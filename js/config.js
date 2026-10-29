@@ -32,6 +32,10 @@ export const CONFIG = {
     cng:      { hp: 20, loss: 0.15, stun: 1.4 },
     bus:      { hp: 32, loss: 0.25, stun: 2.0 },
   },
+  // the chada button (E / click / X): how long you hold it for each level (seconds). Tap = soft ask.
+  grab: { t1: 0.45, t2: 1.0, t3: 1.6 },
+  // Space: a hop that clears potholes and puddles
+  jump: { time: 0.62, height: 0.75, stamina: 0.06 },
   potholeHp: 4,        // tripping in a pothole
   potholeStun: 0.8,
 };

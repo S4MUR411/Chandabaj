@@ -252,3 +252,18 @@ export function crowdSound(vol = 1, x, z) {         // an angry rumble when a cr
     tone(150, 0.5, 'sawtooth', 0.06 * vol, 0, 120);
   });
 }
+
+// ---------- controls feedback ----------
+// The little sound you get while HOLDING the chada button: it climbs a step each time you reach a harder level.
+// stage 0 = soft ask, 1 = demand, 2 = beat, 3 = vandalise
+export function chargeSound(stage = 0) {
+  const f = [440, 554, 659, 831][Math.max(0, Math.min(3, stage))];
+  tone(f, 0.12, 'triangle', 0.09);
+  if (stage >= 2) tone(f * 0.5, 0.18, 'sawtooth', 0.05);
+  if (stage >= 3) noise(0.08, 1500, 0.06);
+}
+
+export function jumpSound() {                      // a short "hup": a quick upward chirp and a puff of air
+  tone(260, 0.12, 'sine', 0.09, 0, 480);
+  noise(0.06, 1800, 0.035, 0, 'highpass');
+}

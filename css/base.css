@@ -46,18 +46,10 @@ canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 .ov { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 24px; background: #241608ee; overflow: auto; z-index: 10; }
 .ov h1 { font-size: clamp(54px, 12vw, 110px); margin: 0; color: var(--gold); text-shadow: 0 5px 0 #7a1a00; font-weight: 800; line-height: 1.1; }
 .ov p { max-width: 34em; line-height: 1.55; margin: 8px 0; }
-.keys { display: grid; grid-template-columns: auto auto; gap: 6px 18px; text-align: left; margin: 14px 0; font-size: 15px; }
-kbd { background: #fff; color: #111; border-radius: 6px; padding: 1px 9px; font-family: inherit; font-weight: 800; }
+.keys { display: grid; grid-template-columns: auto minmax(0, 28em); gap: 6px 18px; text-align: left; margin: 14px 0; font-size: 15px; align-items: baseline; }
+kbd { margin: 0 1px; background: #fff; color: #111; border-radius: 6px; padding: 1px 9px; font-family: inherit; font-weight: 800; }
 
 button { font: inherit; font-weight: 800; font-size: 22px; border: 0; border-radius: 12px; padding: 12px 30px; background: var(--gold); color: #2a1300; cursor: pointer; margin-top: 14px; touch-action: manipulation; }
 button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
-#touch { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
-#touch .pad, #touch .acts { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); pointer-events: auto; }
-#touch .pad { left: 18px; width: 132px; height: 132px; touch-action: none; }
-#touch .pad .stick { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; background: #fffc; box-shadow: 0 3px 10px #000a; transition: transform .05s; }
-#touch .pad .ring { position: absolute; inset: 0; border-radius: 50%; background: #0006; border: 2px solid #fff4; }
-#touch .acts { right: 14px; display: grid; grid-template-columns: repeat(2, 56px); grid-gap: 8px; touch-action: none; }
-#touch .acts button { margin: 0; padding: 0; width: 56px; height: 56px; font-size: 20px; border-radius: 50%; background: #fffc; color: #2a1300; box-shadow: 0 3px 8px #000a; }
-#touch .acts .bribe { grid-column: 1/3; width: auto; height: 44px; border-radius: 22px; font-size: 16px; background: var(--gold); }
-@media (hover: hover) and (pointer: fine) { #touch { display: none !important; } }
+/* phone controls and the chada key cap live in controls.css */

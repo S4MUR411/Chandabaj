@@ -13,8 +13,9 @@ import {
 } from './actors/crowd.js';
 import {
   initAudio, cashSound, thudSound, sirenSound, bribeSound, stepSound, splashSound,
-  setListener, toggleMute, isMuted, suspendAudio,
+  setListener, toggleMute, isMuted, suspendAudio, chargeSound, jumpSound,
 } from './fx/audio.js';
+import { initInput, updateInput, input, keyHint, releaseAll, showTouch } from './input.js';
 import { updateEngines, resetEngines } from './fx/engines.js';
 import { updateAmbience, resetAmbience } from './fx/ambience.js';
 import { initVoice, speak, setPlayerRef, cycleVoiceMode, voiceMode } from './fx/voice.js';
@@ -71,7 +72,7 @@ const S = {
   town: 1, stam: 1, stun: 0, immune: 0, closed: 0, beaten: 0,
   hp: CONFIG.maxHp, beat: 0, fall: 0, slow: 0, knockTo: null, hpZeroT: 0, cause: '',
   beatings: 0, vehicleHits: 0, holeTrips: 0, inHole: false, inPuddle: false,
-  mobActive: false, mobTimer: 0, copActive: false, henchmen: 0,
+  mobActive: false, mobTimer: 0, copActive: false, henchmen: 0, air: false,
 };
 let henchmanObjs = [];
 let paused = false;
@@ -79,32 +80,34 @@ let time = 0;
 let last = performance.now();
 let stepTimer = 0;
 let beatSayT = 0;
+const J = { on: false, t: 0, h: 0 };         // the jump in progress
 let lastPuddleSay = -99;
 let beatT = 0;
 let shake = 0;
 let quiet = 0;             // short pause between "run over" jokes, so they do not repeat every frame
 
-// --- Input ---
-const keys = {};
-addEventListener('keydown', (e) => {
-  const k = e.key.toLowerCase();
-  if (!e.repeat && S.on) {
-    if (k === 'm') toast(toggleMute() ? '🔇 সব আওয়াজ বন্ধ (M চাপলে আবার চালু)' : '🔊 আওয়াজ চালু');
-    if (k === 'v') {
-      const m = cycleVoiceMode();
-      toast(m === 'off' ? '🗣️ কণ্ঠ বন্ধ — শুধু লেখা' : m === 'babble' ? '🗣️ গুনগুন কণ্ঠ (মজার বকবক)' : '🗣️ বাংলা কণ্ঠ (ফোনে থাকলে)');
-    }
-    if (k === 'p' || k === 'escape') togglePause();
-    if (!paused) {
-      if (k >= '1' && k <= '4') act(+k - 1);
-      if (k === 'b') bribe();
-      if (k === 'h') hireHenchman();
-    }
+// --- Input (all devices are in js/input.js) ---
+let jumpBuf = 0;                     // a Space press is remembered for a moment, so a jump pressed a hair too early still happens
+function onPress(name) {
+  if (!S.on) return;
+  if (name === 'mute') toast(toggleMute() ? '🔇 সব আওয়াজ বন্ধ (M চাপলে আবার চালু)' : '🔊 আওয়াজ চালু');
+  else if (name === 'voice') {
+    const m = cycleVoiceMode();
+    toast(m === 'off' ? '🗣️ কণ্ঠ বন্ধ — শুধু লেখা' : m === 'babble' ? '🗣️ গুনগুন কণ্ঠ (মজার বকবক)' : '🗣️ বাংলা কণ্ঠ (ফোনে থাকলে)');
+  } else if (name === 'pause') togglePause();
+  else if (!paused) {
+    if (name === 'bribe') bribe();
+    else if (name === 'hire') hireHenchman();
+    else if (name === 'jump') jumpBuf = 0.18;
+    else if (name.startsWith('ask')) act(+name.slice(3));         // the old 1-4 keys: choose the level directly
   }
-  keys[k] = true;
-  if (k.startsWith('arrow') || k === ' ') e.preventDefault();
-});
-addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+}
+// the chada button went down / up (E, left click, X, the big touch button)
+function onAction(down, cancelled) {
+  if (down) grabStart();
+  else if (grab.active) { if (cancelled) cancelGrab(); else grabRelease(); }
+}
+initInput({ onPress, onAction });
 
 // the camera follows you sideways, but stays on the road (a lamp pole or a hanging sign must never pass through the lens)
 function camX(x) { return Math.max(-GEO.half + 0.8, Math.min(GEO.half - 0.8, x * 0.92)); }
@@ -153,6 +156,7 @@ function flash(id) {
 
 function togglePause() {
   paused = !paused;
+  if (paused) cancelGrab();
   $('#pauseBadge').hidden = !paused;
   audioPause(paused);
 }
@@ -210,15 +214,18 @@ const humorousQuotes = [
   "“আপনেরে দেখলেই বুকের ভেতর কাঁপন ধরে ভাই!”"
 ];
 
-function act(k) {
+const coolToast = (h) => toast(h.sq > 2 ? '“ভাই আজ তো তিনবার দিলাম, আর রক্ত নাই!”' : '“আজ তো দিলামই!”');
+
+// k = how tough (0 soft ask, 1 demand, 2 beat, 3 vandalise); shop = the one you were charging (default: the nearest)
+function act(k, shop) {
   if (S.stun > 0) return;
-  const h = near();
+  const h = shop || near();
   if (!h) {
     toast('আশেপাশে কোনো শিকার বা দোকান নেই!');
     return;
   }
   if (h.cool > 0) {
-    toast(h.sq > 2 ? '“ভাই আজ তো তিনবার দিলাম, আর রক্ত নাই!”' : '“আজ তো দিলামই!”');
+    coolToast(h);
     return;
   }
 
@@ -246,6 +253,31 @@ function act(k) {
 
   if (S.anger >= 100 && !S.mobActive) startMob();
   if (S.heat >= 100 && !S.copActive) callCop();
+}
+
+// --- The chada button: tap = a soft ask; hold = tougher and tougher (demand, beat, vandalise); let go to do it ---
+const STAGES = ['নরম চাঁদা', 'দাবি', 'মার', 'ভাঙচুর'];
+const grab = { active: false, t: 0, stage: 0, shop: null };
+const stageOf = (t) => (t >= CONFIG.grab.t3 ? 3 : t >= CONFIG.grab.t2 ? 2 : t >= CONFIG.grab.t1 ? 1 : 0);
+
+function grabStart() {
+  if (!S.on || paused || S.stun > 0 || S.beat > 0) return;
+  const h = near();
+  if (!h) { toast('আশেপাশে কোনো শিকার বা দোকান নেই!'); return; }
+  if (h.cool > 0) { coolToast(h); return; }
+  grab.active = true; grab.t = 0; grab.stage = 0; grab.shop = h;
+}
+function cancelGrab() { grab.active = false; grab.shop = null; }
+function grabRelease() { const h = grab.shop, k = grab.stage; cancelGrab(); act(k, h); }
+
+// every frame while the button is held: count the time, step up a level, drop it if the shop is no longer in reach
+function updateGrab(dt) {
+  if (!grab.active) return;
+  const h = grab.shop;
+  if (S.stun > 0 || S.beat > 0 || !h.open || h.cool > 0 || near() !== h) { cancelGrab(); return; }
+  grab.t += dt;
+  const st = stageOf(grab.t);
+  if (st > grab.stage) { grab.stage = st; chargeSound(st); shake = Math.max(shake, 0.05 * st); }
 }
 
 function bribe() {
@@ -413,9 +445,10 @@ function begin() {
     on: true, cash: 0, anger: 0, heat: 0, time: CONFIG.roundSec, town: 1, stam: 1, stun: 0, immune: 2.5, closed: 0, beaten: 0,
     hp: CONFIG.maxHp, beat: 0, fall: 0, slow: 0, knockTo: null, hpZeroT: 0, cause: '',
     beatings: 0, vehicleHits: 0, holeTrips: 0, inHole: false, inPuddle: false,
-    mobActive: false, mobTimer: 0, copActive: false, henchmen: 0,
+    mobActive: false, mobTimer: 0, copActive: false, henchmen: 0, air: false,
   });
   stepTimer = 0; beatT = 0; shake = 0; beatSayT = 0; lastPuddleSay = -99; quiet = 0;
+  cancelGrab(); jumpBuf = 0; J.on = false; J.h = 0; player.userData.baseY = 0;
   player.position.set(START_X, 0, 0);
   player.rotation.set(0, Math.PI, 0);
 
@@ -451,6 +484,7 @@ function loop(now) {
   requestAnimationFrame(loop);
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
+  updateInput();                                       // keyboard, mouse, controller and touch -> one set of numbers (also while paused: Start un-pauses)
   if (paused) { renderer.render(scene, camera); return; }
   time += dt;
   quiet = Math.max(0, quiet - dt);
@@ -500,15 +534,18 @@ function loop(now) {
       else pp.x += Math.sign(dx) * Math.min(Math.abs(dx), 9 * dt);
     }
 
-    // ---- movement
-    const dx = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
-    const dz = (keys.s || keys.arrowdown ? 1 : 0) - (keys.w || keys.arrowup ? 1 : 0);
-    const mv = S.stun <= 0 && (dx !== 0 || dz !== 0);
-    const run = !!(mv && (keys.shift || keys[' ']) && S.stam > 0.02);
+    // ---- the chada button (hold = tougher)
+    updateGrab(dt);
+
+    // ---- movement (a stick or a thumb can walk gently, a keyboard always at full speed)
+    const dx = input.moveX, dz = input.moveZ;
+    const mv = S.stun <= 0 && input.mag > 0.05;
+    const run = !!(mv && input.sprint && S.stam > 0.02);
 
     if (mv) {
-      const l = Math.hypot(dx, dz);
-      const sp = (run ? CONFIG.runSp : CONFIG.walkSp) * (S.slow > 0 ? 0.65 : 1) * (S.inPuddle ? 0.8 : 1);
+      const l = Math.hypot(dx, dz) || 1;
+      const push = Math.max(0.4, input.mag);
+      const sp = (run ? CONFIG.runSp : CONFIG.walkSp) * push * (S.slow > 0 ? 0.65 : 1) * (S.inPuddle ? 0.8 : 1);
       pp.x = Math.max(-MAX_X, Math.min(MAX_X, pp.x + (dx / l) * sp * dt));
       pp.z += (dz / l) * sp * dt;
       player.rotation.y = Math.atan2(dx, dz);
@@ -517,27 +554,48 @@ function loop(now) {
       // Footsteps in time with the walking animation (one per leg swing)
       stepTimer += dt;
       if (stepTimer > Math.PI / (6 + sp * 0.6)) {
-        stepSound(S.inPuddle ? 'puddle' : (Math.abs(pp.x) < GEO.half ? 'road' : 'foot'));
+        if (!S.air) stepSound(S.inPuddle ? 'puddle' : (Math.abs(pp.x) < GEO.half ? 'road' : 'foot'));
         stepTimer = 0;
       }
+    } else if (grab.active) {                                         // standing and asking: face the shop
+      player.rotation.y = Math.atan2(grab.shop.x - pp.x, grab.shop.z - pp.z);
     }
+
+    // ---- jump (Space / A / the jump button): a hop that clears potholes and puddles
+    jumpBuf = Math.max(0, jumpBuf - dt);
+    if (jumpBuf > 0 && !J.on && S.stun <= 0 && S.beat <= 0 && S.fall <= 0 && S.stam > CONFIG.jump.stamina) {
+      J.on = true; J.t = 0; jumpBuf = 0;
+      S.stam -= CONFIG.jump.stamina;
+      jumpSound();
+    }
+    if (J.on) {
+      J.t += dt;
+      const u = J.t / CONFIG.jump.time;
+      if (u >= 1 || S.stun > 0 || S.beat > 0) {
+        J.on = false; J.h = 0;
+        stepSound(Math.abs(pp.x) < GEO.half ? 'road' : 'foot');          // landing
+      } else J.h = CONFIG.jump.height * 4 * u * (1 - u);
+    }
+    player.userData.baseY = J.h;                // pose.js adds this to the walking bob, so the hop shows on screen
+    S.air = J.on && J.h > 0.12;
 
     S.stam = run ? Math.max(0, S.stam - dt * 0.3) : Math.min(1, S.stam + dt * 0.18);
 
     ensureChunks(pp.z);
     if (S.beat > 0 || (S.stun > 0 && S.fall <= 0)) setMode(player, 'down');
     else if (S.fall > 0) setMode(player, 'tumble');
+    else if (grab.active && !mv) setMode(player, grab.stage >= 1 ? 'point' : 'talk');
     else setMode(player, mv ? (run ? 'run' : 'walk') : 'idle');
 
     // ---- puddles slow you down, potholes trip you
-    const inPuddle = !!puddleAt(pp.x, pp.z, 0.1);
+    const inPuddle = !S.air && !!puddleAt(pp.x, pp.z, 0.1);
     if (inPuddle && !S.inPuddle) {
       splashSound(0.5);
       if (time - lastPuddleSay > 8) { lastPuddleSay = time; bubble(player, pickLine('puddle'), 'say', 2.0, 2.5); }
     }
     S.inPuddle = inPuddle;
 
-    const hole = potholeAt(pp.x, pp.z, 0.2);
+    const hole = S.air ? null : potholeAt(pp.x, pp.z, 0.2);
     if (hole && !S.inHole && S.stun <= 0 && S.immune <= 0 && S.beat <= 0) {
       S.inHole = true;
       S.holeTrips++;
@@ -662,6 +720,7 @@ function loop(now) {
 
   blobShadow.position.x = pp.x;
   blobShadow.position.z = pp.z;
+  blobShadow.scale.setScalar(Math.max(0.5, 1 - J.h * 0.6));     // the shadow shrinks while you are in the air
 
   animateFigure(player, dt, time, animSpeed);
 
@@ -684,9 +743,43 @@ function loop(now) {
   camera.lookAt(camLook);
 
   updateSky(dt, time, camera, pp);
+  updateGrabUi(time);
   updateHud(dt);
   renderer.render(scene, camera);
   updateBubbles(dt);
+}
+
+// --- The prompt: a bouncing arrow over the shop you can squeeze + a key cap at the bottom with a ring that fills while you hold ---
+const marker = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.0001, 0.75, 4), new THREE.MeshBasicMaterial({ color: 0xffd21a }));
+marker.visible = false;
+scene.add(marker);
+const gEl = document.getElementById('grab'), gRing = document.getElementById('grabRing'), gKey = document.getElementById('grabKey');
+const gLbl = document.getElementById('grabLbl'), gSub = document.getElementById('grabSub'), gBig = document.querySelector('[data-btn="action"]');
+const gPips = gEl ? [...gEl.querySelectorAll('.pips u')] : [];
+const RING = 119.4;                                                           // length of the ring line (2 * PI * 19)
+const setTxt = (el, t) => { if (el && el.textContent !== t) el.textContent = t; };
+
+function updateGrabUi(time) {
+  const h = (S.on && !paused && S.beat <= 0 && S.stun <= 0) ? near() : null;
+  const cooling = !!h && h.cool > 0;
+  marker.visible = !!h && !cooling;
+  if (marker.visible) {
+    marker.position.set(h.x, 4.3 + Math.sin(time * 5) * 0.18, h.z);
+    marker.scale.setScalar(1 + (grab.active ? grab.stage * 0.25 : 0));
+  }
+  if (gBig) gBig.classList.toggle('ready', marker.visible);
+  if (!gEl) return;
+  gEl.hidden = !h;
+  if (!h) return;
+  gEl.classList.toggle('cool', cooling);
+  gEl.dataset.stage = grab.active ? String(grab.stage) : '-1';
+  const prog = grab.active ? Math.min(1, grab.t / CONFIG.grab.t3) : 0;
+  gRing.style.strokeDashoffset = (RING * (1 - prog)).toFixed(1);
+  setTxt(gKey, input.device === 'touch' ? '👆' : keyHint('action').slice(0, 5));
+  if (cooling) { setTxt(gLbl, 'এইমাত্র দিয়েছে (' + bn(Math.ceil(h.cool)) + ')'); setTxt(gSub, h.name); }
+  else if (grab.active) { setTxt(gLbl, STAGES[grab.stage] + (grab.stage >= 2 ? '!' : '')); setTxt(gSub, grab.stage === 3 ? 'ছাড়ুন — সব ভাঙবে!' : 'ছেড়ে দিন, নইলে ধরে রাখুন আরও কড়া করতে'); }
+  else { setTxt(gLbl, 'চাঁদা চাও'); setTxt(gSub, h.name + ' · ধরে রাখলে আরও কড়া'); }
+  gPips.forEach((u, i) => u.classList.toggle('on', grab.active && i <= grab.stage));
 }
 
 // --- HUD ---
@@ -712,6 +805,7 @@ function updateHud(dt) {
   hudAcc += dt;
   if (hudAcc < 1 / CONFIG.hudHz) return;
   hudAcc = 0;
+  showTouch(S.on && input.device === 'touch');
 
   $('#cash').textContent = tk(S.cash);
   $('#time').textContent = bn(Math.max(0, Math.ceil(S.time)));
@@ -730,11 +824,11 @@ function updateHud(dt) {
     const h = near();
     const seen = informedCount();
     if (S.beat > 0) p = "😵 গণধোলাই চলছে…";
-    else if (h) p = h.cool > 0 ? `${h.name}: এইমাত্র চাঁদা দিয়েছে` : `${h.name} · ১-৪ চেপে চাঁদা তুলুন`;
-    else if (S.copActive) p = "🚨 পুলিশ আসছে! B চেপে চা-পানি দিন!";
-    else if (S.mobActive) p = "⚠️ জনতা তেড়ে আসছে! Shift চেপে পালান — রাস্তায় গাড়ির সামনে ফেলতে পারলে ভালো!";
+    else if (S.copActive) p = `🚨 পুলিশ আসছে! ${keyHint('bribe')} চেপে চা-পানি দিন!`;
+    else if (S.mobActive) p = `⚠️ জনতা তেড়ে আসছে! ${keyHint('sprint')} চেপে পালান — ${keyHint('jump')} চেপে গর্ত টপকান!`;
+    else if (h) p = '';                                            // the key cap above (#grab) already says what to do
     else if (seen > 0) p = `👀 ${bn(seen)} জন আপনাকে চিনে ফেলেছে — জনরোষ বাড়ছে`;
-    else p = "💡 টিপস: ৳৫০০ খরচ করে 'H' চেপে মাস্তান পুষুন!";
+    else p = `💡 টিপস: ৳৫০০ খরচ করে ${keyHint('hire')} চেপে মাস্তান পুষুন!`;
   }
 
   if ($('#prompt').dataset.p !== p) {

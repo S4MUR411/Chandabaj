@@ -1,0 +1,67 @@
+/* ---- the chada key cap (bottom centre, above the hint line) ---- */
+#grab {
+  position: absolute; left: 50%; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 52px); transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px; padding: 8px 18px 8px 10px; max-width: 94vw;
+  background: #000b; border-radius: 40px; border: 2px solid #fff3; pointer-events: none;
+  transition: background .12s, border-color .12s, transform .12s;
+}
+#grab .cap { position: relative; width: 52px; height: 52px; flex: none; }
+#grab .cap svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+#grab .cap circle { fill: none; stroke-width: 4; }
+#grab .cap .bg { stroke: #fff3; }
+#grab .cap .fg { stroke: var(--gold); stroke-linecap: round; stroke-dasharray: 119.4; stroke-dashoffset: 119.4; }
+#grab .cap b {
+  position: absolute; left: 7px; top: 7px; right: 7px; bottom: 7px; display: flex; align-items: center; justify-content: center;
+  background: #fff; color: #111; border-radius: 9px; font-size: 18px; line-height: 1; box-shadow: 0 3px 0 #0007; white-space: nowrap; overflow: hidden;
+}
+#grab .txt { display: flex; flex-direction: column; text-align: left; min-width: 0; }
+#grab strong { font-size: clamp(18px, 3vw, 24px); line-height: 1.15; color: var(--gold); }
+#grab small { font-size: 13px; opacity: .85; line-height: 1.25; }
+#grab .pips { display: flex; gap: 4px; flex: none; }
+#grab .pips u { width: 9px; height: 9px; border-radius: 50%; background: #fff3; text-decoration: none; transition: background .1s, transform .1s; }
+#grab .pips u.on { background: var(--gold); transform: scale(1.25); }
+#grab[data-stage="0"] .cap .fg { stroke: #ffd21a; }
+#grab[data-stage="1"] .cap .fg { stroke: #ff9f1a; }
+#grab[data-stage="2"] .cap .fg { stroke: #ff5a2a; }
+#grab[data-stage="3"] .cap .fg { stroke: #ff1f3d; }
+#grab:not([data-stage="-1"]) { background: #1a0a04ee; border-color: #ffd21a99; transform: translateX(-50%) scale(1.06); }
+#grab[data-stage="3"] { border-color: #ff1f3d; animation: shake .12s linear infinite; }
+#grab.cool { opacity: .75; }
+#grab.cool strong { color: #fff; font-size: 17px; }
+#grab.cool .cap b { background: #999; }
+@keyframes shake { 0% { margin-left: -2px; } 50% { margin-left: 2px; } 100% { margin-left: -2px; } }
+
+/* ---- phone / tablet controls ---- */
+#touch { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+#touch button {
+  position: static; margin: 0; padding: 0; border: 2px solid #fff6; background: #000a; color: #fff; font-weight: 800;
+  box-shadow: 0 3px 10px #000a; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+}
+#touch button.down { transform: scale(.92); background: var(--gold); color: #2a1300; }
+#touch .pad { position: absolute; left: 22px; bottom: calc(max(14px, env(safe-area-inset-bottom)) + 40px); width: 132px; height: 132px; opacity: .35; transition: opacity .15s; }
+#touch .pad.on { opacity: 1; }
+#touch .pad .ring { position: absolute; inset: 0; border-radius: 50%; background: #0005; border: 2px solid #fff5; }
+#touch .pad .stick { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: #fffd; box-shadow: 0 3px 10px #000a; }
+#touch .btns {
+  position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: calc(max(12px, env(safe-area-inset-bottom)) + 40px);   /* 40 px = the news ticker */
+  display: grid; grid-template-columns: auto auto; grid-template-areas: "mastan jump" "chai big"; gap: 10px; align-items: end; justify-items: end;
+}
+#touch .big { grid-area: big; width: 92px; height: 92px; border-radius: 50%; font-size: 20px; background: var(--gold); color: #2a1300; border-color: #fff; }
+#touch .big.ready { box-shadow: 0 0 0 5px #ffd21a88, 0 0 24px #ffd21a; animation: ready .7s ease-in-out infinite alternate; }
+#touch .mid { grid-area: jump; width: 64px; height: 64px; border-radius: 50%; font-size: 16px; }
+#touch .sm[data-btn="bribe"] { grid-area: chai; width: 78px; height: 46px; border-radius: 23px; font-size: 14px; align-self: end; }
+#touch .sm[data-btn="hire"] { grid-area: mastan; width: 78px; height: 46px; border-radius: 23px; font-size: 14px; }
+#touch .pausebtn { position: absolute; right: max(14px, env(safe-area-inset-right)); top: calc(max(12px, env(safe-area-inset-top)) + 54px); width: 44px; height: 44px; border-radius: 50%; font-size: 18px; }
+@keyframes ready { from { transform: scale(1); } to { transform: scale(1.06); } }
+@media (max-height: 460px) {
+  #touch .big { width: 78px; height: 78px; }
+  #touch .mid { width: 54px; height: 54px; }
+  #touch .pad { width: 112px; height: 112px; }
+  #grab { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 40px); }
+}
+
+/* ---- start screen: key rows, and phones do not need the keyboard list ---- */
+.keys .kr { display: contents; }
+.keys .kr.tc { display: none; }
+@media (pointer: coarse) { .keys .kr.kb { display: none; } .keys .kr.tc { display: contents; } }
