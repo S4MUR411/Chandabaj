@@ -5,7 +5,8 @@
 .bub {
   position: absolute; left: 0; top: 0;
   padding: 3px 10px; border-radius: 12px;
-  font-weight: 800; font-size: 14px; line-height: 1.25; white-space: nowrap;
+  font-weight: 800; font-size: 14px; line-height: 1.25; white-space: normal; text-align: center;
+  width: max-content; max-width: min(300px, 78vw);
   background: #fff; color: #1d1814; border: 2px solid #1d1814;
   box-shadow: 0 2px 0 #0006;
   will-change: transform;

@@ -201,7 +201,7 @@ const HINTS = {
   keys:  { action: 'E', bribe: 'F', hire: 'Q', jump: 'Space', sprint: 'Shift', pause: 'Esc' },
   mouse: { action: 'ক্লিক', bribe: 'F', hire: 'Q', jump: 'Space', sprint: 'Shift', pause: 'Esc' },
   pad:   { action: 'X', bribe: 'B', hire: 'Y', jump: 'A', sprint: 'L3', pause: 'Start' },
-  touch: { action: 'ডানের বড় বাটন', bribe: '“চা-পানি” বাটন', hire: '“মাস্তান” বাটন', jump: '“লাফ” বাটন', sprint: 'স্টিক পুরো টেনে', pause: '⏸' },
+  touch: { action: 'ডানের বড় বাটন', bribe: '“চা-পানি” বাটন', hire: '“মাস্তান” বাটন', jump: '“লাফ” বাটন', sprint: 'স্টিক পুরা টাইনা', pause: '⏸' },
 };
 export const keyHint = (name) => (HINTS[input.device] || HINTS.keys)[name];
 

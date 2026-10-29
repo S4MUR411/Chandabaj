@@ -15,7 +15,7 @@ const pickOf = (a) => a[Math.floor(Math.random() * a.length)];
 // which sounds a shop makes, by words in its name. First match wins.
 export const SHOP_SOUNDS = [
   { words: ['টেলিকম', 'মোবাইল', 'ইলেকট্রনিক্স'], sound: 'music', every: [7, 14], vol: 0.9 },
-  { words: ['হোটেল', 'বিরিয়ানি', 'সুইটস'], sound: 'frying', every: [3, 7], vol: 1.0 },
+  { words: ['হোটেল', 'বিরিয়ানি', 'সুইটস', 'মিষ্টি', 'জিলাপি'], sound: 'frying', every: [3, 7], vol: 1.0 },
   { words: ['চা '], sound: 'tea', every: [3, 8], vol: 1.0 },
   { words: ['টেইলার্স'], sound: 'sewing', every: [8, 16], vol: 0.8 },
   { words: ['মাছ'], sound: 'chop', every: [3, 8], vol: 1.0 },

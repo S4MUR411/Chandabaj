@@ -25,10 +25,10 @@
       <div id="time">১০০</div>
     </div>
     <div class="bars">
-      <label>জনরোষ<i><b id="ang"></b></i><span id="angV">০%</span></label>
-      <label>পুলিশ<i><b id="heat"></b></i><span id="heatV">০%</span></label>
+      <label>পাবলিকের রাগ<i><b id="ang"></b></i><span id="angV">০%</span></label>
+      <label>পুলিশের নজর<i><b id="heat"></b></i><span id="heatV">০%</span></label>
       <label>দম<i><b id="stam"></b></i><span id="stamV">০%</span></label>
-      <label>স্বাস্থ্য<i><b id="hp"></b></i><span id="hpV">১০০%</span></label>
+      <label>জান<i><b id="hp"></b></i><span id="hpV">১০০%</span></label>
     </div>
     <div id="toast" role="status" aria-live="polite"></div>
     <div id="floats"></div>
@@ -59,33 +59,33 @@
   <div id="touch" hidden>
     <div class="pad" id="pad"><div class="ring"></div><div class="stick" id="stick"></div></div>
     <div class="btns">
-      <button data-btn="action" class="big" aria-label="চাঁদা চাও (ধরে রাখলে আরও কড়া)">চাঁদা</button>
+      <button data-btn="action" class="big" aria-label="চাঁদা চা (ধইরা রাখলে আরও কড়া)">চাঁদা</button>
       <button data-btn="jump" class="mid" aria-label="লাফ">লাফ</button>
       <button data-btn="bribe" class="sm" aria-label="চা-পানি">চা-পানি</button>
       <button data-btn="hire" class="sm" aria-label="মাস্তান ভাড়া">মাস্তান</button>
     </div>
-    <button data-btn="pause" class="pausebtn" aria-label="বিরতি"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="currentColor"/></svg></button>
+    <button data-btn="pause" class="pausebtn" aria-label="একটু থাম"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="currentColor"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="currentColor"/></svg></button>
   </div>
 
-  <div id="pauseBadge" hidden>বিরতি</div>
+  <div id="pauseBadge" hidden>একটু জিরাই…</div>
 
   <div id="start" class="ov">
     <h1>চাঁদাবাজ</h1>
-    <p>বাজার আজ আপনার। ১০০ সেকেন্ডে যত পারেন তুলুন। কিন্তু রাস্তায় যারা আপনাকে চাঁদা তুলতে দেখে, তারাই একদিন আপনাকে ধরে পিটাবে। রিকশা, সিএনজি আর বাসের সামনে পড়লেও রক্ষা নেই — আর গর্ত তো আছেই।</p>
+    <p>আজকে বাজার তোর। ১০০ সেকেন্ডে যত পারস তোল — বসের টার্গেট ৳২৫০০। কিন্তু খেয়াল রাখিস: যারা তোরে চাঁদা তুলতে দেখবো, তারাই পরে দল বাইন্ধা কেলাইবো। পুলিশ মামা আছে, রিকশা-সিএনজি-বাস আছে, আর গর্ত তো ঢাকার জাতীয় সম্পদ।</p>
     <div class="keys">
-      <div class="kr kb"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>↑ ← ↓ →</kbd></span><span>হাঁটুন</span></div>
-      <div class="kr kb"><span><kbd>Shift</kbd></span><span>দৌড় (দম লাগে)</span></div>
-      <div class="kr kb"><span><kbd>Space</kbd></span><span>লাফ — গর্ত আর জলকাদা টপকান</span></div>
-      <div class="kr kb"><span><kbd>E</kbd> / <kbd>মাউসের বাঁ ক্লিক</kbd></span><span><b>চাঁদা চান</b> — দোকানের কাছে গিয়ে চাপুন। <b>ধরে রাখলে</b> ধাপে ধাপে কড়া হয়: নরম → দাবি → মার → ভাঙচুর। ছেড়ে দিলেই কাজ শেষ</span></div>
-      <div class="kr kb"><span><kbd>F</kbd></span><span>চা-পানি (পুলিশকে ঘুষ)</span></div>
-      <div class="kr kb"><span><kbd>Q</kbd></span><span>মাস্তান ভাড়া (৳৫০০)</span></div>
-      <div class="kr kb"><span><kbd>Esc</kbd> / <kbd>P</kbd></span><span>বিরতি</span></div>
+      <div class="kr kb"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / <kbd>↑ ← ↓ →</kbd></span><span>হাঁট</span></div>
+      <div class="kr kb"><span><kbd>Shift</kbd></span><span>দৌড় (দম খরচ)</span></div>
+      <div class="kr kb"><span><kbd>Space</kbd></span><span>লাফ — গর্ত আর কাদাপানি টপকা</span></div>
+      <div class="kr kb"><span><kbd>E</kbd> / <kbd>মাউসের বাঁ ক্লিক</kbd></span><span><b>চাঁদা চা</b> — দোকানের সামনে গিয়া চাপ। <b>ধইরা রাখলে</b> লেভেল বাড়ে: মিষ্টি করে চাওয়া → ধমক → ধোলাই → ভাঙচুর। ছাড়লেই কাজ শেষ</span></div>
+      <div class="kr kb"><span><kbd>F</kbd></span><span>চা-পানি (পুলিশ মামারে খুশি কর)</span></div>
+      <div class="kr kb"><span><kbd>Q</kbd></span><span>মাস্তান ভাড়া কর (৳৫০০)</span></div>
+      <div class="kr kb"><span><kbd>Esc</kbd> / <kbd>P</kbd></span><span>একটু থাম</span></div>
       <div class="kr kb"><span><kbd>M</kbd> / <kbd>V</kbd></span><span>আওয়াজ বন্ধ · কণ্ঠ বদল</span></div>
-      <div class="kr"><span>🎮 কন্ট্রোলার</span><span>বাঁ স্টিক হাঁটা · A লাফ · X বা RT চাঁদা (ধরে রাখুন) · B চা-পানি · Y মাস্তান · L3/LB দৌড় · Start বিরতি</span></div>
-      <div class="kr tc"><span>📱 ফোন</span><span>বাঁ দিকে টেনে হাঁটুন (কিনারা পর্যন্ত টানলে দৌড়)। ডানের বড় বাটনে চাঁদা — ধরে রাখলে আরও কড়া। ছোট বাটনে লাফ, চা-পানি, মাস্তান।</span></div>
+      <div class="kr"><span>🎮 কন্ট্রোলার</span><span>বাঁ স্টিকে হাঁট · A লাফ · X বা RT চাঁদা (ধইরা রাখ) · B চা-পানি · Y মাস্তান · L3/LB দৌড় · Start থাম</span></div>
+      <div class="kr tc"><span>📱 ফোন</span><span>বাঁ দিকে আঙুল টাইনা হাঁট (কিনারা পর্যন্ত টানলে দৌড়)। ডানের বড় বাটনে চাঁদা — ধইরা রাখলে আরও কড়া। ছোট বাটনে লাফ, চা-পানি, মাস্তান।</span></div>
     </div>
-    <button id="go">বাজারে নামুন</button>
-    <p><small>🔊 শব্দ চালু করে খেলুন — ইঞ্জিন, বাজার আর মজার সংলাপ আছে। কাল্পনিক ব্যঙ্গ।</small></p>
+    <button id="go">বাজারে নাম, ভাই</button>
+    <p><small>🔊 সাউন্ড অন কইরা খেল — ইঞ্জিন, বাজারের হইচই আর গালিগালাজ সব আছে।<br>পুরাটাই কাল্পনিক ব্যঙ্গ — বাস্তবে চাঁদাবাজি করলে পাবলিক সত্যি সত্যি দিবো। <b>১৮+ ভাষা।</b></small></p>
   </div>
 
   <!-- The newspaper end screen is drawn into this box (there must be only ONE of these) -->

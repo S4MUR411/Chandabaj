@@ -19,7 +19,7 @@ import { animateFigure, setMode, faceToward } from './pose.js';
 import { vehicleAt, hitVehicle } from './vehicles.js';
 import { bubble } from '../ui/bubbles.js';
 import { whistleSound, crowdSound } from '../fx/audio.js';
-import { LINES } from '../fx/lines.js';
+import { pickLine, randomDialect } from '../fx/lines.js';
 
 const WIN_FRONT = 88;        // people live from this far in front of the player (hidden in the fog)...
 const WIN_BACK = 14;         // ...to this far behind (just behind the camera)
@@ -42,11 +42,13 @@ const pickOf = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const sgn = (x) => (x < 0 ? -1 : 1);
 
 // ---------- what people say ----------
-// the sentences themselves live in fx/lines.js (so you can edit them in one place)
-const CHAT = LINES.chat, SHOP_CALL = LINES.shop, SEEN = LINES.seen, GOSSIP = LINES.gossip, VICTIM = LINES.victim;
-const MOB = LINES.mob, BEAT = LINES.beat, CALM = LINES.calm, COP = LINES.cop, RUNOVER = LINES.runover;
+// the sentences themselves live in fx/lines.js (so you can edit them in one place).
+// `pool` is the name of a list there ('chat', 'mob' ...); every person speaks in his own dialect (a.dialect).
+function say(a, pool, kind = 'say', ttl = 2.4) { bubble(a.fig, pickLine(pool, a.dialect), kind, ttl, 2.45 * (a.fig.scale.y || 1)); }
 
-function say(a, lines, kind = 'say', ttl = 2.4) { bubble(a.fig, pickOf(lines), kind, ttl, 2.45 * (a.fig.scale.y || 1)); }
+// a shopkeeper whose shop has a place name on the sign talks like people from there
+const SHOP_DIALECT = [['চিটাগাং', 'ctg'], ['চাটগাঁ', 'ctg'], ['সিলেট', 'syl'], ['নোয়াখালী', 'noa'], ['বরিশাল', 'bar'], ['বরিশাইল্লা', 'bar'], ['পুরান ঢাকা', 'puran'], ['কুট্টি', 'puran']];
+const dialectOfShop = (name) => { for (const [w, d] of SHOP_DIALECT) if (name.includes(w)) return d; return null; };
 
 // ---------- looks ----------
 const SHIRTS = [0xe0e0e0, 0x6b8f71, 0xb59a6a, 0xa94442, 0x2f6fb0, 0xc0c0c0, 0x8d6bb5, 0xd9a441];
@@ -80,8 +82,9 @@ const stickGeo = new THREE.BoxGeometry(0.07, 1.0, 0.07);
 const stickMat = new THREE.MeshLambertMaterial({ color: 0x8d5f3b });
 
 // ---------- actors ----------
-function makeActor(kind, look) {
+function makeActor(kind, look, dialect) {
   const fig = makeFigure(look, Math.random() * 1000);
+  fig.userData.dialect = dialect || randomDialect();
   // what the voice of this person sounds like (see fx/voice.js)
   fig.userData.voice = kind === 'cop' ? 'cop' : (look && look.robe && SAREE.includes(look.robe) ? 'woman' : (look && look.hairColor ? 'elder' : 'man'));
   scene.add(fig);
@@ -93,7 +96,7 @@ function makeActor(kind, look) {
   const a = {
     id: ++uid, kind, fig, mark, state: 'walk', timer: rnd(2, 8), side: 1, dir: 1, speed: 1.4, laneX: footX(5.6),
     informed: 0, gossipT: 0, mob: false, stick: null, shop: null, home: null, target: null,
-    downFor: 0, afterDown: 'return', slide: 0, slot: 0, chatT: rnd(4, 12), dead: false,
+    downFor: 0, afterDown: 'return', slide: 0, slot: 0, chatT: rnd(4, 12), dead: false, dialect: fig.userData.dialect,
   };
   actors.push(a);
   return a;
@@ -148,7 +151,7 @@ function spawnChatGroup(side, z) {
 }
 
 function spawnKeeper(shop, pz) {
-  const a = makeActor('keeper', keeperLook());
+  const a = makeActor('keeper', keeperLook(), dialectOfShop(shop.name));
   a.shop = shop; a.side = shop.side;
   a.home = { x: shop.side * footX(6.25), z: shop.z + rnd(-1.0, 1.0), ry: -shop.side * Math.PI / 2 };
   place(a, a.home.x, a.home.z, a.home.ry);
@@ -251,12 +254,12 @@ export function witness(x, z, sev, shop) {
   const k = shop ? keeperOf.get(shop) : null;
   if (k && k.shop && k.shop.open) {
     k.state = 'victim'; k.timer = 2.4 + sev * 0.5;
-    say(k, VICTIM, 'say', 2.4);
+    say(k, 'victim', 'say', 2.4);
   }
   seen.sort((p, q) => p.d - q.d);
   seen.slice(0, 2).forEach(({ a }, i) => {
     a.state = 'watch'; a.timer = rnd(4, 8);
-    if (i === 0) say(a, SEEN, 'angry', 2.6);
+    if (i === 0) say(a, 'seen', 'angry', 2.6);
   });
   return told;
 }
@@ -292,7 +295,7 @@ export function formMob(P, want = 8) {
   cand.sort((p, q) => p.score - q.score);
   cand.slice(0, want).forEach(({ a }) => joinMob(a));
   const members = mobMembers();
-  members.slice(0, 2).forEach(a => say(a, MOB, 'angry', 2.2));
+  members.slice(0, 2).forEach(a => say(a, 'mob', 'angry', 2.2));
   if (members[0]) crowdSound(1, members[0].fig.position.x, members[0].fig.position.z);
   return members.length;
 }
@@ -307,7 +310,7 @@ function release(a, line) {
     a.side = sgn(a.fig.position.x || a.side);                                                          // everybody else: back onto the footpath
     a.target = { x: a.side * footX(5.65), z: a.fig.position.z };
   }
-  if (line) say(a, CALM, 'say', 2.2);
+  if (line) say(a, 'calm', 'say', 2.2);
 }
 
 // the mob gives up (time ran out)
@@ -340,7 +343,7 @@ export function startBeating(P) {
     a.state = 'ring';
     a.slot = Math.PI / 2 + OPEN + (n > 1 ? (i / (n - 1)) * arc : arc / 2) + (Math.random() - 0.5) * 0.12;
   });
-  m.slice(0, 2).forEach(a => say(a, BEAT, 'angry', 1.8));
+  m.slice(0, 2).forEach(a => say(a, 'beat', 'angry', 1.8));
   return ring.length;
 }
 
@@ -366,7 +369,7 @@ export function alertCop(P) {
   best.speed = CONFIG.copSpeed;
   best.giveUp = Math.max(40, Math.hypot(best.fig.position.x - P.x, best.fig.position.z - P.z) + 22);   // he stops looking when you are this far away
   whistleSound(1, best.fig.position.x, best.fig.position.z);
-  say(best, COP, 'angry', 2.6);
+  say(best, 'cop', 'angry', 2.6);
   return best;
 }
 
@@ -419,7 +422,7 @@ export function updateCrowd(dt, time, P, flags = {}) {
           if (b === a || b.dead || b.informed > 0 || b.kind === 'cop' || b.mob || !b.fig.visible) continue;
           if (Math.hypot(b.fig.position.x - a.fig.position.x, b.fig.position.z - a.fig.position.z) < 5 && Math.random() < 0.6) {
             b.informed = 16;
-            if (Math.random() < 0.5) say(a, GOSSIP, 'say', 2.4);
+            if (Math.random() < 0.5) say(a, 'gossip', 'say', 2.4);
             break;
           }
         }
@@ -435,7 +438,7 @@ export function updateCrowd(dt, time, P, flags = {}) {
       a.fig.position.z < P.z + 2 && a.fig.position.z > P.z - 48);
     if (near.length) {
       const a = pickOf(near);
-      say(a, a.kind === 'keeper' ? SHOP_CALL : CHAT, 'say', 3);
+      say(a, a.kind === 'keeper' ? 'shop' : 'chat', 'say', 3);
     }
   }
 
@@ -610,7 +613,7 @@ function runOverCheck(a) {
   if (!v) return;
   hitVehicle(v);
   knockDown(a, a.kind === 'cop' ? 3 : 3.8, v.dir * v.v * 0.6);
-  say(a, RUNOVER, 'say', 1.8);
+  say(a, 'runover', 'say', 1.8);
   events.push({ t: 'runover', actor: a, vehicle: v });
 }
 

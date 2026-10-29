@@ -28,7 +28,7 @@
   .lines { columns: 2 340px; column-gap: 18px; }
   .line { display:flex; gap:8px; align-items:center; break-inside: avoid; padding: 3px 0; border-bottom: 1px dotted var(--line); }
   .line button { padding: 2px 9px; margin: 0; flex: none; }
-  .line .k { color: var(--dim); font-size: 12px; flex:none; width: 112px; white-space: nowrap; }
+  .line .k { color: var(--dim); font-size: 12px; flex:none; width: 132px; white-space: nowrap; }
   .line .t { font-family: "Anek Bangla", system-ui, sans-serif; }
   .pool { font-weight: 700; margin: 12px 0 4px; color: var(--acc); break-after: avoid; }
   #status { position: sticky; top: 0; background: #000c; padding: 8px 12px; border-bottom: 1px solid var(--line); z-index: 5; backdrop-filter: blur(6px); font-size: 14px; }
@@ -92,7 +92,7 @@
       <label style="grid-template-columns:auto auto;gap:6px"><input type="checkbox" id="angry"><span>shouting</span></label>
     </div>
     <p id="ttsinfo"></p>
-    <p>The grey code in front of each line (like <b>mob-3</b>) is the file name to use if you record that line yourself: save it as <b>audio/voice/mob-3.mp3</b> and add <b>'mob-3'</b> to the list <b>RECORDED</b> at the bottom of <b>js/fx/lines.js</b>.</p>
+    <p>The grey code in front of each line (like <b>mob-dhaka-3</b>) is the file name to use if you record that line yourself: save it as <b>audio/voice/mob-dhaka-3.mp3</b> and add <b>'mob-dhaka-3'</b> to the list <b>RECORDED</b> at the bottom of <b>js/fx/lines.js</b>.</p>
     <div id="lines" class="lines"></div>
   </section>
 
@@ -109,7 +109,7 @@ import * as A from './js/fx/audio.js';
 import * as E from './js/fx/engines.js';
 import * as Am from './js/fx/ambience.js';
 import * as Vo from './js/fx/voice.js';
-import { LINES } from './js/fx/lines.js';
+import { allLines, DIALECT_NAMES } from './js/fx/lines.js';
 import { GEO } from './js/config.js';
 
 const $ = (s) => document.querySelector(s);
@@ -193,22 +193,22 @@ for (const s of world.shops) {
 
 // ---- voices ----
 $('#mode').onchange = (e) => { Vo.setVoiceMode(+e.target.value); };
-for (const [pool, list] of Object.entries(LINES)) {
-  const h = document.createElement('div'); h.className = 'pool'; h.textContent = pool; $('#lines').appendChild(h);
-  list.forEach((text, i) => {
-    const d = document.createElement('div'); d.className = 'line';
-    d.innerHTML = `<button>▶</button><span class="k">${pool}-${i + 1}</span><span class="t"></span>`;
-    d.querySelector('.t').textContent = text;
-    d.querySelector('button').onclick = () => {
-      if (!need()) return;
-      const who = $('#who').value, target = { position: { x: +$('#lx').value + 2.5, z: -6 }, userData: { voice: who } };
-      Vo.setPlayerRef(who === 'player' ? target : null);
-      const ok = Vo.speak(text, target, $('#angry').checked ? 'angry' : 'say', true);
-      const info = Vo.lastVoiceInfo();
-      status(ok && info ? `Spoken as: ${info.how} (${info.type})` : 'Not spoken (voices are off, or too many lines at once).');
-    };
-    $('#lines').appendChild(d); 
-  });
+let lastGroup = '';
+for (const { key, text, pool, dialect } of allLines()) {
+  const group = pool + (dialect ? ' · ' + (DIALECT_NAMES[dialect] || dialect) : '');
+  if (group !== lastGroup) { const h = document.createElement('div'); h.className = 'pool'; h.textContent = group; $('#lines').appendChild(h); lastGroup = group; }
+  const d = document.createElement('div'); d.className = 'line';
+  d.innerHTML = `<button>▶</button><span class="k">${key}</span><span class="t"></span>`;
+  d.querySelector('.t').textContent = text;
+  d.querySelector('button').onclick = () => {
+    if (!need()) return;
+    const who = $('#who').value, target = { position: { x: +$('#lx').value + 2.5, z: -6 }, userData: { voice: who } };
+    Vo.setPlayerRef(who === 'player' ? target : null);
+    const ok = Vo.speak(text, target, $('#angry').checked ? 'angry' : 'say', true);
+    const info = Vo.lastVoiceInfo();
+    status(ok && info ? `Spoken as: ${info.how} (${info.type})` : 'Not spoken (voices are off, or too many lines at once).');
+  };
+  $('#lines').appendChild(d);
 }
 
 // ---- report ----

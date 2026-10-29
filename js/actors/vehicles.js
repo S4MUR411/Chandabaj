@@ -16,7 +16,7 @@ import { afterFont, FONT, luma, css } from '../util/fontdraw.js';
 import { makeFigure } from './figure.js';
 import { animateFigure, setMode } from './pose.js';
 import { bellSound, hornSound, crashSound } from '../fx/audio.js';
-import { LINES } from '../fx/lines.js';
+import { randomDialect } from '../fx/lines.js';
 import { potholeAt, puddleAt } from '../world/hazards.js';
 import { GEO } from '../config.js';
 
@@ -44,9 +44,6 @@ const TYPES = {
   cng:      { hl: 1.35, hw: 0.78, vmin: 4.6, vmax: 6.4 },
   bus:      { hl: 4.2, hw: 1.3, vmin: 5.0, vmax: 7.0 },
 };
-
-// what the drivers shout (the sentences are in fx/lines.js)
-export const SHOUTS = { rickshaw: LINES.rickshaw, cng: LINES.cng, bus: LINES.bus };
 
 let sceneRef = null;
 const lanes = LANES.map(l => ({ ...l, list: [], gap: 20 }));
@@ -78,7 +75,7 @@ const BUS = [
   { a: 0xd9671a, b: 0xe8e4d8, c: 0x1d4e9e },
   { a: 0xf2c500, b: 0xe8e4d8, c: 0xc8102e },
 ];
-const BUS_NAMES = ['ভাই ভাই পরিবহন', 'সোনার তরী', 'জনতা এক্সপ্রেস', 'বাংলার মুখ', 'লাকী সার্ভিস', 'ঝড় এক্সপ্রেস', 'মায়ের দোয়া', 'দুরন্ত পরিবহন'];
+const BUS_NAMES = ['ভাই ভাই পরিবহন', 'সোনার তরী', 'ঠেলাঠেলি পরিবহন', 'লক্কড়ঝক্কড় এক্সপ্রেস', 'লাকী সার্ভিস', 'ঝড় এক্সপ্রেস', 'মায়ের দোয়া', 'ব্রেকফেল পরিবহন'];
 const BUS_ROUTES = ['মিরপুর – গুলিস্তান', 'উত্তরা – মতিঝিল', 'যাত্রাবাড়ী – গাবতলী', 'ফার্মগেট – সদরঘাট'];
 
 function contactShadow(P, w, l) { P.patch(0, 0.016, 0, w, l, 0x0e0e0e, 0, 16); }
@@ -264,6 +261,7 @@ function makeVehicle(laneIdx, z, speedFactor = 1) {
   const type = KIND[lane.kind].pick(Math.random());
   const T = TYPES[type];
   const { group, riders } = build(type);
+  group.userData.dialect = randomDialect();        // how the driver / helper shouts (see fx/lines.js)
   const vd = rnd(T.vmin, T.vmax);
   const veh = {
     type, lane: laneIdx, dir: lane.dir, hl: T.hl, hw: T.hw,

@@ -100,10 +100,10 @@ let quiet = 0;             // short pause between "run over" jokes, so they do n
 let jumpBuf = 0;                     // a Space press is remembered for a moment, so a jump pressed a hair too early still happens
 function onPress(name) {
   if (!S.on) return;
-  if (name === 'mute') toast(toggleMute() ? '🔇 সব আওয়াজ বন্ধ (M চাপলে আবার চালু)' : '🔊 আওয়াজ চালু');
+  if (name === 'mute') toast(toggleMute() ? '🔇 সব চুপ! (আবার শুনতে M চাপ)' : '🔊 আওয়াজ অন — বাজার আবার গরম');
   else if (name === 'voice') {
     const m = cycleVoiceMode();
-    toast(m === 'off' ? '🗣️ কণ্ঠ বন্ধ — শুধু লেখা' : m === 'babble' ? '🗣️ গুনগুন কণ্ঠ (মজার বকবক)' : '🗣️ বাংলা কণ্ঠ (ফোনে থাকলে)');
+    toast(m === 'off' ? '🗣️ কেউ মুখ খুলবো না — খালি লেখা' : m === 'babble' ? '🗣️ বকবক মোড (আজাইরা প্যাঁচাল)' : '🗣️ আসল বাংলা কণ্ঠ (ফোনে থাকলে)');
   } else if (name === 'pause') togglePause();
   else if (!paused) {
     if (name === 'bribe') bribe();
@@ -138,13 +138,6 @@ function near() {
   return best;
 }
 
-const funToasts = [
-  "“টাকা দিবি নাকি দোকান ভাঙবো?”",
-  "বসের সালাম নিবি!",
-  "উন্নয়নের চাঁদা ক্যাশ করে নিলেন ভাই!",
-  "দোকানদার ভয়ে ক্যাশবাক্স খুলে দিল!",
-  "“এই বাজারে থাকতে হলে সালামি মাস্ট!”"
-];
 const pickOf = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 function toast(text) {
@@ -193,13 +186,13 @@ function hurt(n, cause) {
 function hireHenchman() {
   const cost = 500;
   if (S.cash < cost) {
-    toast('পকেটে ৫০০ টাকা নাই, মাস্তান পুষবেন কেমনে?');
+    toast('পকেটে ৫০০ ট্যাকাও নাই, মাস্তান পালবি কেমনে?');
     return;
   }
   S.cash -= cost;
   S.henchmen++;
-  toast('দল ভারী হলো! +১ মাস্তান ছোকরা যোগ দিল');
-  say(`ব্রেকিং: আন্ডারওয়ার্ল্ডে গুঞ্জন — ‘ভাই’-এর বহরে যুক্ত হলো নতুন ক্যাডার!`, 'breaking');
+  toast('দল ভারী! নতুন পোলা জয়েন করছে, হাতে হকিস্টিক 🏑');
+  say(pickOf(['এলাকায় ‘ভাই’য়ের নতুন পোলাপান — চায়ের দোকানে আতঙ্ক', 'বেকারত্ব কমলো! ‘ভাই’য়ের দলে নতুন নিয়োগ', 'মাস্তান মার্কেটে চাহিদা তুঙ্গে, রেট ৫০০ টাকা']), 'breaking');
 
   const h = makeFigure({ shirt: 0x334455, pants: 0x111111, skin: 0xc58c63 });
   h.position.set(
@@ -218,20 +211,32 @@ const AH = [20, 35, 55, 100];
 const AC = [5, 8, 11, 0];
 
 const humorousQuotes = [
-  "“ভাইজান, বাকিতে একটু ছাড় দেন না!” — দোকানদার কেঁদে ফেলল।",
-  "“চাঁদা না দিলে পুলিশ ডাকবো!” — দোকানদারের হুমকি হাওয়ায় মিলিয়ে গেল।",
-  "“আজকের চা-নাস্তার খরচ উঠে গেল!”",
-  "“আপনেরে দেখলেই বুকের ভেতর কাঁপন ধরে ভাই!”"
+  '“ভাই, আজকে বেচাকেনাই নাই… আচ্ছা নেন নেন!”',
+  'দোকানদার: “এইটা দিয়া পোলার কোচিং ফি দিতাম…”',
+  '“বিকাশে নিবেন নাকি ক্যাশ?” — ডিজিটাল বাংলাদেশ!',
+  'দোকানদার মনে মনে: “আল্লাহ তোর বিচার করবো”',
+  '“রসিদ দিবেন ভাই?” — “রসিদ? মাইর খাবি?”',
+  'চাঁদা কালেকশন ১০০% — ভ্যাট-ট্যাক্স ০%',
+  '“আপনেরে দেখলেই বুকের ভিতর ধুকপুক করে, ভাই!”',
+  'আজকের চা-সিগারেটের খরচ উইঠা গেল!',
 ];
+// what the ticker says when you collect (the shop name and the amount are filled in)
+const COLLECT_NEWS = [
+  (n, t) => `${n}-এ ‘উন্নয়ন ফি’ আদায় ${t}`,
+  (n, t) => `${n}-এর মালিক ‘খুশি মনে’ দিলেন ${t} (চোখে পানি)`,
+  (n, t) => `${n} থেকে ${t} — দোকানদার বললেন ‘সব ঠিক আছে, ভাই খুব ভালো মানুষ’`,
+  (n, t) => `${n}-এ ${t} এর ‘স্বেচ্ছা অনুদান’, রসিদ চাইলে মাইর ফ্রি`,
+];
+const VEH_NAME = { rickshaw: 'রিকশা', cng: 'সিএনজি', bus: 'বাস' };
 
-const coolToast = (h) => toast(h.sq > 2 ? '“ভাই আজ তো তিনবার দিলাম, আর রক্ত নাই!”' : '“আজ তো দিলামই!”');
+const coolToast = (h) => toast(h.sq > 2 ? '“ভাই আজকে তিনবার দিছি, এখন কিডনি বেচা লাগবো!”' : '“এইমাত্র না দিলাম? মেমোরি লস নাকি, ভাই?”');
 
 // k = how tough (0 soft ask, 1 demand, 2 beat, 3 vandalise); shop = the one you were charging (default: the nearest)
 function act(k, shop) {
   if (S.stun > 0) return;
   const h = shop || near();
   if (!h) {
-    toast('আশেপাশে কোনো শিকার বা দোকান নেই!');
+    toast('আশেপাশে চিপা দেওয়ার মতো কোনো দোকান নাই!');
     return;
   }
   if (h.cool > 0) {
@@ -259,21 +264,21 @@ function act(k, shop) {
 
   toast('+' + tk(pay) + ' | ' + pickOf(humorousQuotes));
   cashSound();
-  say(`বাজার আপডেট: ${h.name}-এ চাঁদা আদায় ${tk(pay)}`, 'latest');
+  say(pickOf(COLLECT_NEWS)(h.name, tk(pay)), 'latest');
 
   if (S.anger >= 100 && !S.mobActive) startMob();
   if (S.heat >= 100 && !S.copActive) callCop();
 }
 
 // --- The chada button: tap = a soft ask; hold = tougher and tougher (demand, beat, vandalise); let go to do it ---
-const STAGES = ['নরম চাঁদা', 'দাবি', 'মার', 'ভাঙচুর'];
+const STAGES = ['মিষ্টি করে চাওয়া', 'ধমক', 'ধোলাই', 'ভাঙচুর'];
 const grab = { active: false, t: 0, stage: 0, shop: null };
 const stageOf = (t) => (t >= CONFIG.grab.t3 ? 3 : t >= CONFIG.grab.t2 ? 2 : t >= CONFIG.grab.t1 ? 1 : 0);
 
 function grabStart() {
   if (!S.on || paused || S.stun > 0 || S.beat > 0) return;
   const h = near();
-  if (!h) { toast('আশেপাশে কোনো শিকার বা দোকান নেই!'); return; }
+  if (!h) { toast('আশেপাশে চিপা দেওয়ার মতো কোনো দোকান নাই!'); return; }
   if (h.cool > 0) { coolToast(h); return; }
   grab.active = true; grab.t = 0; grab.stage = 0; grab.shop = h;
 }
@@ -291,20 +296,20 @@ function updateGrab(dt) {
 }
 
 function bribe() {
-  if (S.heat < 50) { toast('এখনো চা-পানির দরকার নেই'); return; }
+  if (S.heat < 50) { toast('এখনো চা-পানির টাইম হয় নাই, মামা'); return; }
   const cost = Math.max(CONFIG.bribeMin, Math.round(S.cash * 0.25 / 50) * 50);
-  if (S.cash < cost) { toast('থানার দারোগাকে খাওয়ানোর মতো টাকা নেই!'); return; }
+  if (S.cash < cost) { toast('দারোগার চা-পানির টাকাও নাই? লজ্জা!'); return; }
 
   S.cash -= cost;
   S.heat = 30;
   S.copActive = false;
   const cop = copChasing();
-  if (cop) bubble(cop.fig, pickLine('bribe'), 'say', 2.6, 2.45);
+  if (cop) bubble(cop.fig, pickLine('bribe', cop.dialect), 'say', 2.6, 2.45);
   dismissCop();                                    // the constable walks back to his post
   bribeSound();
 
-  toast('−' + tk(cost) + '  চা-পানি দিয়ে লাইনঘাট ক্লিয়ার!');
-  say(`ব্রেকিং: থানার সাথে গোপন সমঝোতা সফল! ফাইল ক্লোজ।`, 'breaking');
+  toast('−' + tk(cost) + '  চা-পানি দিয়া সব সেটেল!');
+  say(pickOf(['থানার লগে ‘চা-বিস্কুট বৈঠক’ সফল — ফাইল গায়েব', 'পুলিশ জানাল, ‘আমরা কিছু দেখি নাই’', 'ট্রাফিক মামার পকেট ভারী, মামলা হালকা']), 'breaking');
 }
 
 // --- Threats ---
@@ -314,14 +319,14 @@ function startMob() {
   const n = formMob(player.position, 8);
   if (n < 2) {
     S.anger = 55;
-    toast('রাস্তা ফাঁকা — কেউ সাহস পেল না!');
+    toast('রাস্তা ফাঁকা — পাবলিক সব জ্যামে আটকা!');
     return;
   }
   S.mobActive = true;
   S.mobTimer = CONFIG.mobLifeSec;
   S.anger = 100;
-  toast('⚠️ জনতা খেপে লাল! তেড়ে আসছে!');
-  say('ব্রেকিং: অতিষ্ঠ বাজারবাসীর গণধোলাই অভিযান শুরু!', 'breaking');
+  toast('⚠️ পাবলিক খেপছে! দৌড়া!');
+  say('অতিষ্ঠ পাবলিকের ‘গণধোলাই প্রজেক্ট’ উদ্বোধন!', 'breaking');
 }
 
 function callCop() {
@@ -329,8 +334,8 @@ function callCop() {
   S.heat = 100;
   if (!alertCop(player.position)) { S.heat = 80; return; }   // nobody around (should not happen)
   S.copActive = true;
-  toast(`🚨 পুলিশ হাজির! ${keyHint('bribe')} চেপে চা-পানি দিন!`);
-  say('ব্রেকিং: ট্রাফিক সার্জেন্টের নজরে পড়েছেন চাঁদাবাজ — ধাওয়া শুরু!', 'breaking');
+  toast(`🚨 মামা আইসা পড়ছে! ${keyHint('bribe')} চাইপা চা-পানি দে!`);
+  say('চাঁদাবাজের পিছে ট্রাফিক মামা — বাঁশি ফুঁইকা ধাওয়া!', 'breaking');
   sirenSound();
 }
 
@@ -354,10 +359,10 @@ function beginBeating() {
   const loss = Math.round(S.cash * CONFIG.beatLoss);
   S.cash -= loss;
   hurt(CONFIG.beatHp, 'beat');
-  toast('গণধোলাই! ' + bn(n) + ' জন মিলে পিটাচ্ছে — −' + tk(loss));
+  toast('গণধোলাই! ' + bn(n) + ' জনে মিলা কেলাইতেছে — −' + tk(loss));
   bubble(player, pickLine('beaten'), 'say', 2.6, 2.5);
   beatSayT = 1.8;
-  say('ব্রেকিং: হাতেনাতে ধরা পড়ে গণধোলাইয়ের শিকার চাঁদাবাজ!', 'breaking');
+  say('হাতেনাতে ধরা খাইয়া গণধোলাই খাইলেন ‘ভাই’ — পাবলিক বলছে ‘ফ্রি সার্ভিস’', 'breaking');
   thudSound();
 }
 
@@ -380,9 +385,13 @@ function hitByVehicle(v) {
   hitVehicle(v);
   bubble(player, pickOf(POW), 'pow', 0.9, 1.8);
   bubble(player, pickLine('hurt_' + v.type), 'say', 2.4, 2.5);
-  const name = { rickshaw: 'রিকশা', cng: 'সিএনজি', bus: 'বাস' }[v.type];
-  toast(name + 'র ধাক্কা! −' + tk(loss));
-  say(`ব্রেকিং: ${name}র ধাক্কায় আহত চাঁদাবাজ — চালক বলছেন, “হর্ন তো দিছিলাম!”`, 'breaking');
+  const name = VEH_NAME[v.type];
+  toast(name + 'র ধাক্কা খাইলি! −' + tk(loss));
+  say(pickOf([
+    `${name}র ধাক্কায় চিৎপটাং চাঁদাবাজ — চালক: “হর্ন তো দিছিলাম!”`,
+    `${name}র সাথে ‘ভাই’য়ের সংঘর্ষ, ${name} অক্ষত`,
+    `${name}চালক জানালেন, “উনি রাস্তার মাঝখানে চাঁদা তুলতেছিলেন”`,
+  ]), 'breaking');
 }
 
 // --- Game Over (Newspaper) ---
@@ -401,47 +410,54 @@ function endGame(kind) {
 
   let head, quote1, quote2;
   if (arrested) {
-    head = "“আমি তো শুধু ডাব খাইতে আসছিলাম” — হাতেনাতে ধরা মহা চাঁদাবাজ!";
-    quote1 = Math.random() < 0.5 ? "“তোর নেতার নাম ক, নাইলে মাইর সোজা করব।”" : '“' + pickLine('arrest') + '”';
-    quote2 = "ডিবি ইন্সপেক্টর";
+    head = "“আমি তো ডাব খাইতে আসছিলাম!” — হাতেনাতে ধরা খাইলো মহা চাঁদাবাজ";
+    quote1 = Math.random() < 0.5 ? "“তোর বড় ভাইয়ের নাম ক, নাইলে রিমান্ডে গান শুনামু।”" : '“' + pickLine('arrest') + '”';
+    quote2 = "ডিবির এক ‘মামা’";
   } else if (hospital) {
     if (S.cause === 'beat') {
-      head = "গণধোলাইয়ে ‘ভাই’ হাসপাতালে — জনতার হাতে ধরাশায়ী চাঁদাবাজ!";
-      quote1 = "“আর কোনোদিন চাঁদা তুলবে না — ডাক্তার বলছে, আঙুলও নাড়াতে পারবে না।”";
-      quote2 = "জনৈক পথচারী";
+      head = "গণধোলাইয়ে ‘ভাই’ এখন হাসপাতালের বেডে — স্যালাইন চলতেছে, ভাব কমে নাই";
+      quote1 = "“এমন দিছি, এখন চাঁদা চাইতে গেলেও হাত কাঁপবো।”";
+      quote2 = "জনৈক উত্তেজিত চা-বিক্রেতা";
     } else if (S.cause.startsWith('vehicle')) {
-      head = "রাস্তা পার হতে গিয়ে গাড়ির ধাক্কা — হাসপাতালে চাঁদাবাজ!";
-      quote1 = "“আমি তো সমানে হর্ন দিছিলাম, উনি শুনেনই নাই!”";
-      quote2 = "পরিবহন চালক";
+      head = "রাস্তা পার হইতে গিয়া চিৎপটাং — হাসপাতালে চাঁদাবাজ";
+      quote1 = "“আমি তো হর্ন দিছিলাম, উনি তখন রাস্তার মাঝখানে চাঁদা গুনতেছিলেন!”";
+      quote2 = "জনৈক বাসচালক (লাইসেন্স খুঁজতেছেন)";
     } else {
-      head = "গর্তে পড়ে হাসপাতালে ‘ভাই’ — সড়ক বিভাগ নীরব!";
-      quote1 = "“গর্ত? কোথায় গর্ত? ওটা উন্নয়নের বিশেষ ঢেউ!”";
+      head = "গর্তে পইড়া হাসপাতালে ‘ভাই’ — সড়ক বিভাগ: “ওইটা গর্ত না, উন্নয়নের ঢেউ”";
+      quote1 = "“গর্ত? কই গর্ত? আমরা তো ওইখানে সুইমিংপুল বানাইতেছি।”";
       quote2 = "সড়ক বিভাগের মুখপাত্র";
     }
   } else if (S.closed >= 3) {
-    head = `বাজারে ${bn(S.closed)}টি দোকান বন্ধ, ‘ভাই’-এর পকেট ভারী; এখন চায়ের সাথে সিগারেট ফ্রি!`;
-    quote1 = "“ব্যবসা তো দূর, এখন প্রাণ বাঁচানো দায়।”";
-    quote2 = "ক্ষতিগ্রস্ত মুদি দোকানদার";
+    head = `বাজারে ${bn(S.closed)}টা দোকানের শাটার ডাউন, ‘ভাই’য়ের পকেট ফুল — এলাকায় এখন ‘ভাই’ ছাড়া কেউ হাসে না`;
+    quote1 = "“ব্যবসা না, এখন জান বাঁচানোই আসল বিজনেস।”";
+    quote2 = "শাটার নামানো এক মুদি দোকানদার";
+  } else if (S.cash < 500) {
+    head = `সারাদিন ঘুইরা মাত্র ${tk(S.cash)}! — ‘ভাই’য়ের ক্যারিয়ার নিয়া এলাকায় প্রশ্ন`;
+    quote1 = "“এর চেয়ে আমার ভাগিনা টিকটক কইরা বেশি কামায়।”";
+    quote2 = "হতাশ বড় ভাই";
   } else {
-    head = `“বিনা পরিশ্রমে কোটিপতি”: ${tk(S.cash)} তুলে রাজকীয় কায়দায় ঘরে ফিরলেন ‘ভাই’`;
-    quote1 = "“আমরা কারো পেটে লাথি মারি না, শুধু অংশীদার হই।”";
-    quote2 = "‘ভাই’-এর মুখপাত্র";
+    head = `“বিনা পরিশ্রমে লাখপতি”: ${tk(S.cash)} তুইলা হেলিকপ্টার স্টাইলে বাসায় ফিরলেন ‘ভাই’`;
+    quote1 = "“আমরা কারো পেটে লাথি মারি না, খালি পার্টনারশিপ করি।”";
+    quote2 = "‘ভাই’য়ের মিডিয়া উইং";
   }
 
   const tail = hospital
-    ? 'চিকিৎসার খরচে সব টাকাই গেল। বস্ খোঁজ নিতে এসে দেখে গেছেন, কিন্তু বিল দেননি।'
-    : ok ? 'বস্ বেজায় খুশি, আগামীতে পদোন্নতি কনফার্ম!' : 'বস্ আজ বেজায় নারাজ, সাবধানে থেকেন।';
+    ? 'হাসপাতালের বিল দিতে গিয়া সব টাকা শেষ। বস একবার দেখতে আসছিলেন — ফলমূল আনেন নাই।'
+    : arrested ? 'বস ফোন বন্ধ কইরা দিছেন। থানায় এখন একাই।'
+    : ok ? 'বস খুশিতে টাকে হাত বুলাইলেন — নেক্সট ইলেকশনে টিকিট কনফার্ম!' : 'বস কল ধরতেছেন না। সাবধানে থাকিস।';
+  // where the money went: the hospital bill, the police, or the boss's share
+  const gone = arrested ? ['থানায় জব্দ', S.cash] : hospital ? ['হাসপাতালের বিল', S.cash] : ['বসের ভাগ', cut];
 
   const paper = $('#paper');
   paper.innerHTML = `
     <div class="np">
       <div class="m">দৈনিক বাজার বার্তা</div>
-      <div class="d"><span>বাজারপাড়া, শনিবার</span><span>মূল্য: মাত্র ১০ টাকা</span></div>
+      <div class="d"><span>চায়ের দোকান থেকে প্রকাশিত</span><span>দাম: ১০ টাকা (চাঁদা আলাদা)</span></div>
       <h2>${head}</h2>
-      <div class="big">${arrested ? 'সর্বস্ব বাজেয়াপ্ত' : hospital ? 'হাসপাতালে ভর্তি' : tk(net) + ' পকেটে'}</div>
-      <p class="st">মোট চাঁদা তুলেছিলেন ${tk(S.cash)}। বসের চাঁদা ${tk(arrested || hospital ? S.cash : cut)}। পোষা মাস্তান ছিল ${bn(S.henchmen)} জন। মার খেয়েছেন ${bn(S.beaten)} জন। জনতার হাতে পিটুনি খেয়েছেন ${bn(S.beatings)} বার, গাড়ির ধাক্কা খেয়েছেন ${bn(S.vehicleHits)} বার। ${tail}</p>
+      <div class="big">${arrested ? 'সব জব্দ' : hospital ? 'হাসপাতালে ভর্তি' : tk(net) + ' পকেটে'}</div>
+      <p class="st">‘ভাই’ মোট তুলছিলেন ${tk(S.cash)}। ${gone[0]}: ${tk(gone[1])}। পালা মাস্তান: ${bn(S.henchmen)} জন। দোকানদার কেলাইছেন: ${bn(S.beaten)} জন। নিজে গণধোলাই খাইছেন ${bn(S.beatings)} বার, গাড়ির ধাক্কা ${bn(S.vehicleHits)} বার। ${tail}</p>
       <q>${quote1}</q><b>${quote2}</b>
-      <div style="text-align:center"><button id="again" style="margin-top:20px">আবার মাঠে নামুন</button></div>
+      <div style="text-align:center"><button id="again" style="margin-top:20px">আবার মাঠে নাম</button></div>
     </div>
   `;
   paper.hidden = false;
@@ -479,7 +495,8 @@ function begin() {
   resetAmbience();
   showTicker();
   clearTicker();
-  say('বাজার পুরোদমে চালু — মাঠে নেমেছে চাঁদাবাজ বাহিনী', 'breaking');
+  say('বাজার পুরা গরম — মাঠে নামছে চাঁদাবাজ বাহিনী', 'breaking');
+  $('#quota').textContent = 'বসের টার্গেট ' + tk(CONFIG.quota);
 
   $('#start').hidden = true;
   $('#paper').hidden = true;
@@ -613,7 +630,7 @@ function loop(now) {
       hurt(CONFIG.potholeHp, 'pothole');
       S.stun = CONFIG.potholeStun;
       S.immune = CONFIG.potholeStun + 0.8;
-      toast('গর্তে পা পড়ল! উফ!');
+      toast('গর্তে পা! উন্নয়নে পা আটকাইলো!');
       bubble(player, 'উফ!', 'pow', 0.9, 1.8);
       bubble(player, pickLine('pothole'), 'say', 2.4, 2.5);
       thudSound(0.6);
@@ -626,13 +643,13 @@ function loop(now) {
     }
     for (const e of trafficEvents) {
       if (e.t === 'honk' && e.threat && e.v.v > 1.5 && Math.abs(e.v.z - pp.z) < 30) {
-        bubble(e.v.group, pickLine(e.v.type), 'say', 1.8, 3.6);
+        bubble(e.v.group, pickLine(e.v.type, e.v.group.userData.dialect), 'say', 1.8, 3.6);
       }
       if (e.t === 'splash') splashSound(0.8, e.x, e.z);
       if (e.t === 'splash' && S.immune <= 0 && S.slow <= 0 && Math.hypot(e.x - pp.x, e.z - pp.z) < 3.4) {
         S.slow = 2.2;
         flash('mud');
-        toast('কাদা ছিটকে পড়ল গায়ে!');
+        toast('কাদা ছিটায় দিল! জামা শেষ!');
         bubble(player, pickLine('mud'), 'say', 2.2, 2.5);
       }
     }
@@ -671,7 +688,7 @@ function loop(now) {
           S.henchmen--;
           knockDown(e.actor, 3.2);
           S.immune = Math.max(S.immune, 0.8);
-          toast('আপনার মাস্তান ছোকরা জনতাকে রুখে দিল!');
+          toast('তোর মাস্তান পোলা পাবলিকরে ঠেকায় দিছে!');
           bubble(e.actor.fig, 'ধাম!', 'pow', 0.9, 2.2);
           thudSound();
         } else {
@@ -683,12 +700,11 @@ function loop(now) {
       } else if (e.t === 'cop-gave-up') {
         S.copActive = false;
         S.heat = 60;
-        toast('পুলিশ আর খুঁজে পেল না — হাঁপ ছাড়লেন!');
+        toast('পুলিশ মামা হারায় ফালাইছে — বাঁইচা গেলি!');
       } else if (e.t === 'runover' && quiet <= 0) {
         quiet = 2.5;
-        const who = e.actor.kind === 'cop' ? 'পুলিশ সদস্য' : 'জনতার একজন';
-        const veh = { rickshaw: 'রিকশা', cng: 'সিএনজি', bus: 'বাস' }[e.vehicle.type];
-        toast(`${veh}র ধাক্কায় ${who} ধরাশায়ী!`);
+        const who = e.actor.kind === 'cop' ? 'ট্রাফিক মামা' : 'পাবলিকের একজন';
+        toast(`${VEH_NAME[e.vehicle.type]}র ধাক্কায় ${who} চিৎপটাং!`);
       }
     }
 
@@ -706,17 +722,17 @@ function loop(now) {
       if (beatSayT <= 0) { beatSayT = 1.8; bubble(player, pickLine('beaten'), 'say', 2.2, 2.5); }
       if (S.beat === 0) {
         endBeating();
-        endMob(S.hp > 0 ? 'জনতার গা-ঝাল মিটল… উঠে দাঁড়ান!' : 'জনতা সরে গেল…');
+        endMob(S.hp > 0 ? 'পাবলিকের হাত ব্যথা হইয়া গেছে… উঠ, পালা!' : 'পাবলিক চইলা গেল…');
         S.anger = 25;
       }
     } else if (S.mobActive) {
       // The mob ends when time runs out OR when no one is left
       S.mobTimer -= dt;
       if (mobMembers().length === 0) {
-        endMob('মাস্তানরা পুরো জনতাকে হটিয়ে দিল!');
+        endMob('পাবলিক সব ছত্রভঙ্গ — আজকে বাঁইচা গেলি!');
       } else if (S.mobTimer <= 0) {
         releaseMob();
-        endMob('জনতা ঠান্ডা হলো… আপাতত রক্ষা!');
+        endMob('পাবলিক ঠান্ডা… আপাতত বাঁচলি!');
       }
     }
 
@@ -791,9 +807,9 @@ function updateGrabUi(time) {
   const prog = grab.active ? Math.min(1, grab.t / CONFIG.grab.t3) : 0;
   gRing.style.strokeDashoffset = (RING * (1 - prog)).toFixed(1);
   setTxt(gKey, input.device === 'touch' ? '👆' : keyHint('action').slice(0, 5));
-  if (cooling) { setTxt(gLbl, 'এইমাত্র দিয়েছে (' + bn(Math.ceil(h.cool)) + ')'); setTxt(gSub, h.name); }
-  else if (grab.active) { setTxt(gLbl, STAGES[grab.stage] + (grab.stage >= 2 ? '!' : '')); setTxt(gSub, grab.stage === 3 ? 'ছাড়ুন — সব ভাঙবে!' : 'ছেড়ে দিন, নইলে ধরে রাখুন আরও কড়া করতে'); }
-  else { setTxt(gLbl, 'চাঁদা চাও'); setTxt(gSub, h.name + ' · ধরে রাখলে আরও কড়া'); }
+  if (cooling) { setTxt(gLbl, 'এইমাত্র দিছে (' + bn(Math.ceil(h.cool)) + ')'); setTxt(gSub, h.name); }
+  else if (grab.active) { setTxt(gLbl, STAGES[grab.stage] + (grab.stage >= 2 ? '!' : '')); setTxt(gSub, grab.stage === 3 ? 'ছাড় — দোকান আজকে শেষ!' : 'ছাড়লেই কাজ — আরও ধইরা রাখলে আরও গরম'); }
+  else { setTxt(gLbl, 'চাঁদা চা'); setTxt(gSub, h.name + ' · ধইরা রাখলে আরও কড়া'); }
   gPips.forEach((u, i) => u.classList.toggle('on', grab.active && i <= grab.stage));
 }
 
@@ -810,7 +826,7 @@ function updateWarning() {
     projV.set(t.v.x, 0, player.position.z - 5).project(camera);      // the lane's place on the screen, a little ahead of you
     const px = Math.max(8, Math.min(92, (projV.x * 0.5 + 0.5) * 100));
     w.style.left = px + '%';
-    w.textContent = '▼ ' + ({ rickshaw: 'রিকশা', cng: 'সিএনজি', bus: 'বাস' }[t.v.type]) + ' আসছে!';
+    w.textContent = '▼ পিছে ' + VEH_NAME[t.v.type] + '! সর!';
     w.hidden = false;
   } else w.hidden = true;
 }
@@ -838,12 +854,12 @@ function updateHud(dt) {
   if (S.on) {
     const h = near();
     const seen = informedCount();
-    if (S.beat > 0) p = "😵 গণধোলাই চলছে…";
-    else if (S.copActive) p = `🚨 পুলিশ আসছে! ${keyHint('bribe')} চেপে চা-পানি দিন!`;
-    else if (S.mobActive) p = `⚠️ জনতা তেড়ে আসছে! ${keyHint('sprint')} চেপে পালান — ${keyHint('jump')} চেপে গর্ত টপকান!`;
+    if (S.beat > 0) p = "😵 গণধোলাই চলতেছে…";
+    else if (S.copActive) p = `🚨 পুলিশ আসতেছে! ${keyHint('bribe')} চাইপা চা-পানি দে!`;
+    else if (S.mobActive) p = `⚠️ পাবলিক তাড়া করতেছে! ${keyHint('sprint')} চাইপা দৌড়া — ${keyHint('jump')} চাইপা গর্ত পার হ!`;
     else if (h) p = '';                                            // the key cap above (#grab) already says what to do
-    else if (seen > 0) p = `👀 ${bn(seen)} জন আপনাকে চিনে ফেলেছে — জনরোষ বাড়ছে`;
-    else p = `💡 টিপস: ৳৫০০ খরচ করে ${keyHint('hire')} চেপে মাস্তান পুষুন!`;
+    else if (seen > 0) p = `👀 ${bn(seen)} জন তোরে চিনা ফালাইছে — পাবলিক গরম হইতেছে`;
+    else p = `💡 টিপস: ৳৫০০ খরচ কইরা ${keyHint('hire')} চাইপা মাস্তান পাল!`;
   }
 
   if ($('#prompt').dataset.p !== p) {
