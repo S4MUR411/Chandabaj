@@ -136,7 +136,10 @@ function endStick() {
   if (padEl) { padEl.classList.remove('on'); padEl.style.left = ''; padEl.style.top = ''; padEl.style.bottom = ''; }
   if (stickEl) stickEl.style.transform = 'translate(0px, 0px)';
 }
-export function showTouch(on) { if (touchEl) touchEl.hidden = !on; }
+export function showTouch(on) {
+  if (touchEl) touchEl.hidden = !on;
+  document.body.classList.toggle('touchmode', !!on);           // the HUD makes room for the pause button (css/base.css)
+}
 
 function wireButtons() {
   for (const b of document.querySelectorAll('[data-btn]')) {

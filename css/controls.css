@@ -1,7 +1,7 @@
 /* ---- the chada key cap (bottom centre, above the hint line) ---- */
 #grab {
-  position: absolute; left: 50%; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 52px); transform: translateX(-50%);
-  display: flex; align-items: center; gap: 12px; padding: 8px 18px 8px 10px; max-width: 94vw;
+  position: absolute; left: 50%; bottom: calc(max(4px, env(safe-area-inset-bottom)) + 84px); transform: translateX(-50%);   /* above the hint line and the ticker */
+  display: flex; align-items: center; gap: 12px; padding: 8px 18px 8px 10px; width: max-content; max-width: 94vw;
   background: #000b; border-radius: 40px; border: 2px solid #fff3; pointer-events: none;
   transition: background .12s, border-color .12s, transform .12s;
 }
@@ -58,10 +58,18 @@
   #touch .big { width: 78px; height: 78px; }
   #touch .mid { width: 54px; height: 54px; }
   #touch .pad { width: 112px; height: 112px; }
-  #grab { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 40px); }
+  #grab { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 76px); }
 }
 
 /* ---- start screen: key rows, and phones do not need the keyboard list ---- */
 .keys .kr { display: contents; }
 .keys .kr.tc { display: none; }
 @media (pointer: coarse) { .keys .kr.kb { display: none; } .keys .kr.tc { display: contents; } }
+
+/* ---- phone held upright: the bottom of the screen belongs to the stick and the buttons,
+        so the key cap, the hint line and the "vehicle behind you" warning go above them ---- */
+@media (orientation: portrait) {
+  body.touchmode #prompt { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 232px); padding: 0 10px; }
+  body.touchmode #grab { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 280px); }
+  body.touchmode #warn { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 368px); }
+}

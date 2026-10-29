@@ -32,7 +32,7 @@
 @keyframes flashFade { 0% { opacity: 1; } 100% { opacity: 0; } }
 
 #warn {
-  position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); z-index: 7;
+  position: fixed; bottom: calc(max(4px, env(safe-area-inset-bottom)) + 168px); left: 50%;   /* above the chada key cap */ transform: translateX(-50%); z-index: 7;
   background: #c8102e; color: #fff; font-weight: 800; font-size: clamp(16px, 2.6vw, 22px);
   padding: 6px 16px; border-radius: 10px; border: 2px solid #fff; pointer-events: none;
   animation: warnPulse .4s infinite alternate;

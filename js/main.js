@@ -21,7 +21,7 @@ import { updateAmbience, resetAmbience } from './fx/ambience.js';
 import { initVoice, speak, setPlayerRef, cycleVoiceMode, voiceMode } from './fx/voice.js';
 import { IMPACT, pickLine } from './fx/lines.js';
 import { initBubbles, updateBubbles, bubble, clearBubbles, onSpeak } from './ui/bubbles.js';
-import { say, showTicker } from './ui/ticker.js';
+import { say, showTicker, clearTicker } from './ui/ticker.js';
 import { bn, tk } from './util/bengali.js';
 import { $ } from './util/dom.js';
 
@@ -40,10 +40,20 @@ const camera = new THREE.PerspectiveCamera(CONFIG.cam.fov, innerWidth / innerHei
 const hemi = new THREE.HemisphereLight(0xfff4dc, 0x8a7a5e, 1.1);
 scene.add(hemi);
 
+// The sun. Its shadows are drawn only in a small box around the player (SUN_BOX), and that box
+// moves with the player every frame (see the main loop), so there are shadows everywhere on the street.
+const SUN_OFF = new THREE.Vector3(-8, 18, 6);   // where the sun stands, seen from the player
+const SUN_BOX = 14;                             // half-size (metres) of the area that gets shadows
 const sun = new THREE.DirectionalLight(0xffe0a8, 0.9);
-sun.position.set(-8, 18, 6);
+sun.position.copy(SUN_OFF);
 sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+Object.assign(sun.shadow.camera, { left: -SUN_BOX, right: SUN_BOX, top: SUN_BOX, bottom: -SUN_BOX, near: 1, far: 60 });
+sun.shadow.camera.updateProjectionMatrix();
+sun.shadow.bias = -0.0005;
+sun.shadow.normalBias = 0.03;
 scene.add(sun);
+scene.add(sun.target);                          // the target must be in the scene so it moves with the player
 
 initChunks(scene);
 initSky(scene);
@@ -319,7 +329,7 @@ function callCop() {
   S.heat = 100;
   if (!alertCop(player.position)) { S.heat = 80; return; }   // nobody around (should not happen)
   S.copActive = true;
-  toast('🚨 পুলিশ হাজির! B চেপে চা-পানি দিন!');
+  toast(`🚨 পুলিশ হাজির! ${keyHint('bribe')} চেপে চা-পানি দিন!`);
   say('ব্রেকিং: ট্রাফিক সার্জেন্টের নজরে পড়েছেন চাঁদাবাজ — ধাওয়া শুরু!', 'breaking');
   sirenSound();
 }
@@ -468,6 +478,7 @@ function begin() {
   resetEngines();
   resetAmbience();
   showTicker();
+  clearTicker();
   say('বাজার পুরোদমে চালু — মাঠে নেমেছে চাঁদাবাজ বাহিনী', 'breaking');
 
   $('#start').hidden = true;
@@ -717,6 +728,10 @@ function loop(now) {
   } else {
     setMode(player, 'idle');
   }
+
+  // the sun and its shadow box follow you (a little ahead, where the camera looks)
+  sun.target.position.set(pp.x, 0, pp.z - 4);
+  sun.position.set(pp.x + SUN_OFF.x, SUN_OFF.y, pp.z - 4 + SUN_OFF.z);
 
   blobShadow.position.x = pp.x;
   blobShadow.position.z = pp.z;
