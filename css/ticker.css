@@ -1,0 +1,51 @@
+.ticker {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  background: #000c;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  z-index: 20;
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 16px;
+}
+
+.ticker .tag {
+  padding: 0 12px;
+  font-weight: 800;
+  color: #fff;
+  background: #b3121b;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 2px 0 10px #000;
+}
+
+.ticker .tag.breaking { background: #c8102e; }
+.ticker .tag.latest { background: #1d4e9e; }
+
+.ticker .track {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  height: 100%;
+}
+
+.ticker .item {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  color: #fff;
+  font-weight: 600;
+  padding-left: 20px;
+  pointer-events: none;
+}
+
+.ticker .item.breaking { color: #ffcc00; }

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>চাঁদাবাজ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/ticker.css">
+  <link rel="stylesheet" href="css/paper.css">
+  <link rel="stylesheet" href="css/crowd.css">
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <div id="hud" hidden>
+    <div class="row">
+      <div>
+        <div id="cash" aria-live="polite">৳০</div>
+        <div id="quota"></div>
+      </div>
+      <div id="time">১০০</div>
+    </div>
+    <div class="bars">
+      <label>জনরোষ<i><b id="ang"></b></i><span id="angV">০%</span></label>
+      <label>পুলিশ<i><b id="heat"></b></i><span id="heatV">০%</span></label>
+      <label>দম<i><b id="stam"></b></i><span id="stamV">০%</span></label>
+      <label>স্বাস্থ্য<i><b id="hp"></b></i><span id="hpV">১০০%</span></label>
+    </div>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="floats"></div>
+    <div id="prompt" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- speech bubbles above people, red flash when you are hurt, mud splash, "vehicle behind you" warning -->
+  <div id="bubbles"></div>
+  <div id="hurt"></div>
+  <div id="mud"></div>
+  <div id="warn" hidden></div>
+
+  <div id="ticker" class="ticker" hidden>
+    <span id="tickerTag" class="tag">খবর</span>
+    <div class="track"></div>
+  </div>
+
+  <div id="touch" hidden>
+    <div class="pad" id="pad"><div class="ring"></div><div class="stick" id="stick"></div></div>
+    <div class="acts">
+      <button data-act="0" aria-label="নরম চাঁদা">১</button>
+      <button data-act="1" aria-label="দাবি">২</button>
+      <button data-act="2" aria-label="মার">৩</button>
+      <button data-act="3" aria-label="ভাঙচুর">৪</button>
+      <button data-act="bribe" class="bribe" aria-label="চা-পানি">চা-পানি (B)</button>
+    </div>
+  </div>
+
+  <div id="pauseBadge" hidden>বিরতি</div>
+
+  <div id="start" class="ov">
+    <h1>চাঁদাবাজ</h1>
+    <p>বাজার আজ আপনার। ১০০ সেকেন্ডে যত পারেন তুলুন। কিন্তু রাস্তায় যারা আপনাকে চাঁদা তুলতে দেখে, তারাই একদিন আপনাকে ধরে পিটাবে। রিকশা, সিএনজি আর বাসের সামনে পড়লেও রক্ষা নেই — আর গর্ত তো আছেই।</p>
+    <div class="keys">
+      <span><kbd>W A S D</kbd> / <kbd>↑ ← ↓ →</kbd></span><span>হাঁটুন</span>
+      <span><kbd>Shift</kbd> / <kbd>Space</kbd></span><span>দৌড় (দম লাগে)</span>
+      <span><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></span><span>দোকানের পাশে গিয়ে চাঁদা: নরম · দাবি · মার · ভাঙচুর</span>
+      <span><kbd>B</kbd></span><span>চা-পানি (পুলিশকে ঘুষ)</span>
+      <span><kbd>H</kbd></span><span>মাস্তান ভাড়া (৳৫০০)</span>
+      <span><kbd>P</kbd> / <kbd>Esc</kbd></span><span>বিরতি</span>
+      <span><kbd>M</kbd></span><span>আওয়াজ বন্ধ / চালু</span>
+      <span><kbd>V</kbd></span><span>কণ্ঠ: বন্ধ · গুনগুন · বাংলা কণ্ঠ</span>
+    </div>
+    <button id="go">বাজারে নামুন</button>
+    <p><small>🔊 শব্দ চালু করে খেলুন — ইঞ্জিন, বাজার আর মজার সংলাপ আছে। কাল্পনিক ব্যঙ্গ।</small></p>
+  </div>
+
+  <!-- The newspaper end screen is drawn into this box (there must be only ONE of these) -->
+  <div id="paper" class="ov" hidden></div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

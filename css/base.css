@@ -1,0 +1,63 @@
+:root {
+  --paper: #f1e9d6;
+  --ink: #1d1814;
+  --red: #b3121b;
+  --gold: #ffc61a;
+  --bg: #2a1d12;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  height: 100%; margin: 0; background: var(--bg); overflow: hidden;
+  font-family: "Anek Bangla", "Noto Sans Bengali", sans-serif; color: #fff;
+  overscroll-behavior: none; touch-action: none;
+  user-select: none;
+}
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+[hidden] { display: none !important; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; padding: max(12px, env(safe-area-inset-top)) 14px 0; }
+.row { display: flex; justify-content: space-between; align-items: flex-start; }
+#cash { font-weight: 800; font-size: clamp(34px, 7vw, 56px); color: var(--gold); text-shadow: 0 3px 0 #5a1a00; line-height: 1; transition: transform .15s; }
+#cash.bump { transform: scale(1.08); }
+#time { font-weight: 800; font-size: clamp(22px, 4vw, 32px); background: #000a; padding: 4px 12px; border-radius: 10px; }
+#quota { font-size: 14px; opacity: .9; margin-top: 2px; }
+
+.bars { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.bars label { font-size: 13px; display: flex; flex-direction: column; gap: 3px; width: 112px; }
+.bars i { display: block; height: 10px; background: #0007; border-radius: 5px; overflow: hidden; position: relative; }
+.bars b { display: block; height: 100%; width: 0; border-radius: 5px; transition: width .12s; }
+#ang { background: #e8432f; } #heat { background: #3b82f6; } #stam { background: #7bd36a; }
+.bars .pv { font-size: 11px; opacity: .7; text-align: right; }
+
+#toast { position: absolute; left: 0; right: 0; top: 30%; text-align: center; font-weight: 800; font-size: clamp(26px, 5vw, 44px); text-shadow: 0 3px 0 #000; opacity: 0; pointer-events: none; }
+#toast.s { animation: pop 1.6s ease-out; }
+@keyframes pop { 0% { opacity: 0; transform: scale(.6); } 12% { opacity: 1; transform: scale(1.15); } 25% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-24px); } }
+
+#floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.float { position: absolute; font-weight: 800; font-size: 22px; color: var(--gold); text-shadow: 0 2px 0 #5a1a00; animation: floatUp 1.1s ease-out forwards; pointer-events: none; transform: translate(-50%, -50%); }
+@keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -70%) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -160%) scale(1); } }
+
+#prompt { position: absolute; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom)); text-align: center; font-size: clamp(16px, 2.6vw, 22px); font-weight: 800; }
+#prompt span { background: #000b; padding: 8px 16px; border-radius: 12px; display: inline-block; margin: 4px 6px; }
+
+#pauseBadge { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #000a; font-size: clamp(32px, 8vw, 64px); font-weight: 800; color: var(--gold); pointer-events: none; z-index: 100; }
+
+.ov { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 24px; background: #241608ee; overflow: auto; z-index: 10; }
+.ov h1 { font-size: clamp(54px, 12vw, 110px); margin: 0; color: var(--gold); text-shadow: 0 5px 0 #7a1a00; font-weight: 800; line-height: 1.1; }
+.ov p { max-width: 34em; line-height: 1.55; margin: 8px 0; }
+.keys { display: grid; grid-template-columns: auto auto; gap: 6px 18px; text-align: left; margin: 14px 0; font-size: 15px; }
+kbd { background: #fff; color: #111; border-radius: 6px; padding: 1px 9px; font-family: inherit; font-weight: 800; }
+
+button { font: inherit; font-weight: 800; font-size: 22px; border: 0; border-radius: 12px; padding: 12px 30px; background: var(--gold); color: #2a1300; cursor: pointer; margin-top: 14px; touch-action: manipulation; }
+button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+#touch { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+#touch .pad, #touch .acts { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); pointer-events: auto; }
+#touch .pad { left: 18px; width: 132px; height: 132px; touch-action: none; }
+#touch .pad .stick { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; background: #fffc; box-shadow: 0 3px 10px #000a; transition: transform .05s; }
+#touch .pad .ring { position: absolute; inset: 0; border-radius: 50%; background: #0006; border: 2px solid #fff4; }
+#touch .acts { right: 14px; display: grid; grid-template-columns: repeat(2, 56px); grid-gap: 8px; touch-action: none; }
+#touch .acts button { margin: 0; padding: 0; width: 56px; height: 56px; font-size: 20px; border-radius: 50%; background: #fffc; color: #2a1300; box-shadow: 0 3px 8px #000a; }
+#touch .acts .bribe { grid-column: 1/3; width: auto; height: 44px; border-radius: 22px; font-size: 16px; background: var(--gold); }
+@media (hover: hover) and (pointer: fine) { #touch { display: none !important; } }

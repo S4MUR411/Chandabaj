@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chandabaj – Sound Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#14110d; --card:#211c15; --ink:#f2e8d0; --dim:#a89c82; --acc:#f2c500; --line:#3a3226; --ok:#7fd18b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, "Anek Bangla", sans-serif; }
+  main { max-width: 920px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 24px; margin: 8px 0 2px; }
+  h2 { font-size: 18px; margin: 0 0 10px; color: var(--acc); }
+  p { margin: 6px 0; color: var(--dim); }
+  .bn { font-family: "Anek Bangla", system-ui, sans-serif; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin: 14px 0; }
+  button { background: #3a3226; color: var(--ink); border: 1px solid #54492f; border-radius: 8px; padding: 8px 12px; margin: 3px 3px 3px 0; font: inherit; cursor: pointer; }
+  button:hover { background: #4b4030; }
+  button.go { background: var(--acc); color: #1b1608; border-color: var(--acc); font-weight: 700; }
+  button.on { background: var(--ok); color: #0c2012; border-color: var(--ok); }
+  label { display: grid; grid-template-columns: 130px 1fr 52px; gap: 10px; align-items: center; margin: 4px 0; }
+  label span.v { text-align: right; color: var(--dim); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; }
+  select { background:#3a3226; color:var(--ink); border:1px solid #54492f; border-radius:8px; padding:7px 9px; font:inherit; }
+  canvas { width: 100%; max-width: 520px; height: auto; background:#0c0a07; border:1px solid var(--line); border-radius: 8px; display:block; margin-top: 8px; }
+  pre { background:#0c0a07; border:1px solid var(--line); border-radius:8px; padding:10px; overflow:auto; color:var(--ok); }
+  .lines { columns: 2 340px; column-gap: 18px; }
+  .line { display:flex; gap:8px; align-items:center; break-inside: avoid; padding: 3px 0; border-bottom: 1px dotted var(--line); }
+  .line button { padding: 2px 9px; margin: 0; flex: none; }
+  .line .k { color: var(--dim); font-size: 12px; flex:none; width: 112px; white-space: nowrap; }
+  .line .t { font-family: "Anek Bangla", system-ui, sans-serif; }
+  .pool { font-weight: 700; margin: 12px 0 4px; color: var(--acc); break-after: avoid; }
+  #status { position: sticky; top: 0; background: #000c; padding: 8px 12px; border-bottom: 1px solid var(--line); z-index: 5; backdrop-filter: blur(6px); font-size: 14px; }
+  .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+</style>
+</head>
+<body>
+<div id="status">Press the yellow button first – browsers only allow sound after a click.</div>
+<main>
+  <h1>Chandabaj – Sound Test</h1>
+  <p>Use headphones if you can. Every sound here is the same one the game uses. Move the sliders until it feels right, then tell me the numbers (button at the bottom).</p>
+  <button class="go" id="start">▶ Turn sound on</button>
+  <a href="index.html" style="color:var(--acc);margin-left:10px">Back to the game</a>
+
+  <section>
+    <h2>1 · Volumes</h2>
+    <p>Each slider makes a whole kind of sound louder or quieter.</p>
+    <div id="vols"></div>
+    <label><span>Your position on the road</span><input type="range" id="lx" min="-11" max="11" step="0.5" value="0"><span class="v" id="lxv">0</span></label>
+  </section>
+
+  <section>
+    <h2>2 · Vehicles that drive past</h2>
+    <p>The engine sound belongs to the vehicle: it gets louder as it comes closer, shifts in pitch when it passes, and is heard from the left or the right. The road is drawn below – you are the yellow dot.</p>
+    <div class="row">
+      <button data-pass="bus">🚌 A bus passes</button>
+      <button data-pass="cng">🛺 A CNG passes</button>
+      <button data-pass="rickshaw">🚲 A rickshaw passes</button>
+      <button data-pass="jam">🚦 Busy street (8 vehicles)</button>
+      <button id="clearcars">■ Stop all</button>
+    </div>
+    <canvas id="map" width="520" height="360"></canvas>
+  </section>
+
+  <section>
+    <h2>3 · Horns, bells and bangs</h2>
+    <label><span>Where from (left–right)</span><input type="range" id="ex" min="-12" max="12" step="0.5" value="-6"><span class="v" id="exv">-6</span></label>
+    <label><span>How far away (metres)</span><input type="range" id="ed" min="2" max="60" step="1" value="8"><span class="v" id="edv">8</span></label>
+    <div class="row" id="fx"></div>
+  </section>
+
+  <section>
+    <h2>4 · The bazaar</h2>
+    <p>Crowd noise, traffic hum, chatter from the people around you, and shop sounds chosen by the name on the shop sign.</p>
+    <div class="row">
+      <button id="bazaar">▶ Bazaar on</button>
+      <button id="mobBtn">😡 Angry mob nearby</button>
+    </div>
+    <label><span>People around you</span><input type="range" id="ppl" min="0" max="16" step="1" value="8"><span class="v" id="pplv">8</span></label>
+    <div class="row" id="shopbtns"></div>
+    <p id="ambinfo"></p>
+  </section>
+
+  <section>
+    <h2>5 · Voices and funny lines</h2>
+    <div class="row">
+      <label style="grid-template-columns:auto auto;gap:6px"><span>Voice mode</span>
+        <select id="mode"><option value="1">babble (always works)</option><option value="2">real Bengali speech (if your device has it)</option><option value="0">off</option></select></label>
+      <label style="grid-template-columns:auto auto;gap:6px"><span>Speaker</span>
+        <select id="who"><option>man</option><option>woman</option><option>elder</option><option>cop</option><option>driver</option><option>player</option></select></label>
+      <label style="grid-template-columns:auto auto;gap:6px"><input type="checkbox" id="angry"><span>shouting</span></label>
+    </div>
+    <p id="ttsinfo"></p>
+    <p>The grey code in front of each line (like <b>mob-3</b>) is the file name to use if you record that line yourself: save it as <b>audio/voice/mob-3.mp3</b> and add <b>'mob-3'</b> to the list <b>RECORDED</b> at the bottom of <b>js/fx/lines.js</b>.</p>
+    <div id="lines" class="lines"></div>
+  </section>
+
+  <section>
+    <h2>6 · Tell me how it sounds</h2>
+    <p>Press the button, then copy the text and paste it in our chat together with what you want changed (for example “engines too loud, voices too quiet”).</p>
+    <button id="report">Make my settings text</button>
+    <pre id="out" hidden></pre>
+  </section>
+</main>
+
+<script type="module">
+import * as A from './js/fx/audio.js';
+import * as E from './js/fx/engines.js';
+import * as Am from './js/fx/ambience.js';
+import * as Vo from './js/fx/voice.js';
+import { LINES } from './js/fx/lines.js';
+import { GEO } from './js/config.js';
+
+const $ = (s) => document.querySelector(s);
+const status = (t) => { $('#status').textContent = t; };
+let started = false;
+
+// ---- turn on ----
+$('#start').onclick = async () => {
+  A.initAudio(); const c = A.audioContext();
+  if (!c) { status('Your browser could not start sound.'); return; }
+  await c.resume(); Vo.initVoice(); started = true;
+  $('#start').textContent = '✔ Sound is on'; $('#start').classList.add('on');
+  status('Sound is on. Try the buttons below.');
+  const v = Vo.bengaliVoice();
+  $('#ttsinfo').textContent = v ? `Your device has a Bengali voice: ${v.name} (${v.lang}). Choose “real Bengali speech” to hear it.` : 'Your device has no Bengali voice, so lines are “babble” (a made-up voice with the rhythm of the sentence) unless you add recordings.';
+  if (v) { $('#mode').value = '2'; Vo.setVoiceMode(2); }
+};
+const need = () => { if (!started) { status('Press the yellow “Turn sound on” button first.'); return false; } return true; };
+
+// ---- volumes ----
+const volBox = $('#vols');
+for (const [name, label] of [['master', 'Everything'], ['sfx', 'Horns, bells, bangs'], ['engines', 'Engines'], ['ambience', 'Bazaar'], ['voice', 'Voices']]) {
+  const row = document.createElement('label');
+  row.innerHTML = `<span>${label}</span><input type="range" min="0" max="1.5" step="0.05" value="${A.VOLUME[name]}"><span class="v">${A.VOLUME[name].toFixed(2)}</span>`;
+  const inp = row.querySelector('input'), val = row.querySelector('.v');
+  inp.oninput = () => { val.textContent = (+inp.value).toFixed(2); A.setBusVolume(name, +inp.value); };
+  volBox.appendChild(row);
+}
+$('#lx').oninput = (e) => { $('#lxv').textContent = e.target.value; };
+$('#ex').oninput = (e) => { $('#exv').textContent = e.target.value; };
+$('#ed').oninput = (e) => { $('#edv').textContent = e.target.value; };
+$('#ppl').oninput = (e) => { $('#pplv').textContent = e.target.value; setPeople(+e.target.value); };
+
+// ---- effects ----
+const EFFECTS = [
+  ['Bus horn', (x, z) => A.hornSound('bus', 1, x, z)], ['CNG horn', (x, z) => A.hornSound('cng', 1, x, z)], ['Rickshaw bell', (x, z) => A.bellSound(1, x, z)],
+  ['Crash', (x, z) => A.crashSound(1, x, z)], ['Thud', (x, z) => A.thudSound(1, x, z)], ['Splash', (x, z) => A.splashSound(1, x, z)],
+  ['Police whistle', (x, z) => A.whistleSound(1, x, z)], ['Air brakes', (x, z) => A.hissSound(1, x, z)], ['Angry crowd', (x, z) => A.crowdSound(1, x, z)],
+  ['Cash 💰', () => A.cashSound()], ['Bribe', () => A.bribeSound()], ['Siren', () => A.sirenSound()],
+  ['Step (footpath)', () => A.stepSound('foot')], ['Step (road)', () => A.stepSound('road')], ['Step (puddle)', () => A.stepSound('puddle')],
+];
+for (const [name, fn] of EFFECTS) {
+  const b = document.createElement('button'); b.textContent = name;
+  b.onclick = () => { if (!need()) return; fn(+$('#ex').value + +$('#lx').value, -(+$('#ed').value)); };
+  $('#fx').appendChild(b);
+}
+
+// ---- vehicles ----
+const cars = [];
+const LANE = GEO.lanes;                       // left half drives away (-Z), right half comes at you (+Z)
+const SPEED = { bus: [5, 7], cng: [4.6, 6.4], rickshaw: [2.4, 3.4] };
+const HL = { bus: 4.2, cng: 1.35, rickshaw: 1.3 };
+const rnd = (a, b) => a + Math.random() * (b - a);
+function addCar(type, laneIdx, z) {
+  const dir = laneIdx < 3 ? -1 : 1;
+  cars.push({ type, x: LANE[laneIdx], z: z ?? (dir > 0 ? -70 : 25), dir, v: rnd(...SPEED[type]), hl: HL[type], hw: 1, drive: true });
+}
+document.querySelectorAll('[data-pass]').forEach(b => b.onclick = () => {
+  if (!need()) return; const t = b.dataset.pass;
+  if (t === 'jam') {
+    const types = ['bus', 'cng', 'rickshaw', 'cng', 'bus', 'rickshaw', 'cng', 'bus'];
+    types.forEach((ty, i) => addCar(ty, i % 6, i % 6 < 3 ? -(5 + i * 8) : (-60 + i * 6)));
+  } else if (Math.random() < 0.5) addCar(t, { bus: 3, cng: 4, rickshaw: 5 }[t]);                // comes towards you (right half)
+  else addCar(t, { bus: 2, cng: 1, rickshaw: 0 }[t], 20);                                       // drives away from you (left half), starting just behind you
+});
+$('#clearcars').onclick = () => { cars.length = 0; };
+
+// ---- bazaar ----
+const world = { vehicles: [], people: [], shops: [{ name: 'ভাই ভাই হোটেল', x: -12, z: -6, open: true }, { name: 'রহিম টেলিকম', x: 12, z: -10, open: true }, { name: 'বিসমিল্লাহ চা স্টল', x: -12, z: -16, open: true }, { name: 'শাপলা টেইলার্স', x: 12, z: -22, open: true }, { name: 'মেঘনা মাছ ঘর', x: -12, z: -28, open: true }, { name: 'রহমান টায়ার হাউস', x: 12, z: -34, open: true }], mob: false };
+let bazaarOn = false;
+function setPeople(n) { world.people.length = 0; for (let i = 0; i < n; i++) world.people.push({ dead: false, kind: i % 5 === 0 ? 'keeper' : 'ped', fig: { position: { x: (i % 2 ? 11 : -11) + (Math.random() - 0.5) * 1.5, z: 4 - i * 2.2 }, userData: { voice: ['man', 'woman', 'elder', 'man'][i % 4] } } }); }
+setPeople(8);
+$('#bazaar').onclick = (e) => { if (!need()) return; bazaarOn = !bazaarOn; e.target.textContent = bazaarOn ? '■ Bazaar off' : '▶ Bazaar on'; e.target.classList.toggle('on', bazaarOn); };
+$('#mobBtn').onclick = (e) => { world.mob = !world.mob; e.target.classList.toggle('on', world.mob); if (world.mob && started) A.crowdSound(1, 0, -6); };
+for (const s of world.shops) {
+  const kind = Am.soundOfShop(s.name);
+  const b = document.createElement('button'); b.className = 'bn'; b.textContent = `${s.name} (${kind.sound})`;
+  b.onclick = () => { if (!need()) return; A.placed(s.x, s.z, kind.vol, () => Am.playShopSound(kind.sound), 4); };
+  $('#shopbtns').appendChild(b);
+}
+
+// ---- voices ----
+$('#mode').onchange = (e) => { Vo.setVoiceMode(+e.target.value); };
+for (const [pool, list] of Object.entries(LINES)) {
+  const h = document.createElement('div'); h.className = 'pool'; h.textContent = pool; $('#lines').appendChild(h);
+  list.forEach((text, i) => {
+    const d = document.createElement('div'); d.className = 'line';
+    d.innerHTML = `<button>▶</button><span class="k">${pool}-${i + 1}</span><span class="t"></span>`;
+    d.querySelector('.t').textContent = text;
+    d.querySelector('button').onclick = () => {
+      if (!need()) return;
+      const who = $('#who').value, target = { position: { x: +$('#lx').value + 2.5, z: -6 }, userData: { voice: who } };
+      Vo.setPlayerRef(who === 'player' ? target : null);
+      const ok = Vo.speak(text, target, $('#angry').checked ? 'angry' : 'say', true);
+      const info = Vo.lastVoiceInfo();
+      status(ok && info ? `Spoken as: ${info.how} (${info.type})` : 'Not spoken (voices are off, or too many lines at once).');
+    };
+    $('#lines').appendChild(d); 
+  });
+}
+
+// ---- report ----
+$('#report').onclick = () => {
+  const o = $('#out'); o.hidden = false;
+  o.textContent = 'VOLUME = ' + JSON.stringify(Object.fromEntries(Object.entries(A.VOLUME).map(([k, v]) => [k, +(+v).toFixed(2)]))) + '\nvoice mode: ' + Vo.voiceMode() + '\nBengali voice on this device: ' + (Vo.bengaliVoice() ? Vo.bengaliVoice().name : 'none');
+};
+
+// ---- the loop: drives the vehicles and the bazaar, draws the little map ----
+const cv = $('#map'), g = cv.getContext('2d');
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const lx = +$('#lx').value;
+  A.setListener(lx, 0);
+  for (const v of cars) if (v.drive) v.z += v.dir * v.v * dt;
+  for (let i = cars.length - 1; i >= 0; i--) if (cars[i].z > 45 || cars[i].z < -110) cars.splice(i, 1);
+  if (started) {
+    E.updateEngines(cars, dt);
+    if (bazaarOn) { world.vehicles = cars; Am.updateAmbience(dt, () => world); }
+  }
+  // map: x -14..14 across, z +25 (bottom) .. -75 (top)
+  g.clearRect(0, 0, cv.width, cv.height);
+  const X = (x) => (x + 14) / 28 * cv.width, Z = (z) => (z + 75) / 100 * cv.height;
+  g.fillStyle = '#2a2620'; g.fillRect(X(-GEO.half), 0, X(GEO.half) - X(-GEO.half), cv.height);
+  g.strokeStyle = '#6b6350'; g.setLineDash([8, 10]); for (const x of [-6.67, -3.33, 0, 3.33, 6.67]) { g.beginPath(); g.moveTo(X(x), 0); g.lineTo(X(x), cv.height); g.stroke(); } g.setLineDash([]);
+  const col = { bus: '#d9472b', cng: '#2d9a5a', rickshaw: '#f2c500' };
+  for (const v of cars) {
+    g.fillStyle = col[v.type]; const w = 1.6 / 28 * cv.width, h = v.hl * 2 / 100 * cv.height;
+    g.fillRect(X(v.x) - w / 2, Z(v.z) - h / 2, w, h);
+    if (v.voiceSlot) { g.strokeStyle = '#fff'; g.strokeRect(X(v.x) - w / 2 - 2, Z(v.z) - h / 2 - 2, w + 4, h + 4); }
+  }
+  g.fillStyle = '#f2c500'; g.beginPath(); g.arc(X(lx), Z(0), 7, 0, 7); g.fill();
+  g.fillStyle = '#a89c82'; g.font = '12px system-ui'; g.fillText('white frame = vehicle that has its own engine sound', 8, 16);
+  const s = Am.ambienceStats; $('#ambinfo').textContent = bazaarOn ? `people near you: ${s.people} · shop/crow sounds so far: ${s.shopEvents} · chatter so far: ${s.murmurs}` : '';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
